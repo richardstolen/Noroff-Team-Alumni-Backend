@@ -7,9 +7,9 @@ namespace TeamAlumniNETBackend.Models
         [Key]
         public int EventId { get; set; }
         public string? CreatedBy { get; set; }
-        public List<Rsvp>? Rsvps { get; set; }
-        public List<Topic>? Topics { get; set; }
-        public List<Group>? Groups { get; set; }
-        public List<User>? Users { get; set; }
+        public ICollection<Rsvp>? Rsvps { get; set; }
+        public ICollection<Topic>? Topics { get; set; }
+        public ICollection<Group>? Groups { get; set; }
+        public ICollection<User>? Users { get; set; }
     }
 }

@@ -4,8 +4,8 @@ namespace TeamAlumniNETBackend.Models
 {
     public class Rsvp
     {
-        [Key]
-        public int EventId { get; set; }
+        
+        public Event EventId { get; set; }
         public int UserId { get; set; }
         public DateTime LastUpdate { get; set; }
         public bool Accepted { get; set; } = false;

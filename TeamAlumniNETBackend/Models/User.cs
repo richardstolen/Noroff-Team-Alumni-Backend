@@ -13,9 +13,9 @@ namespace TeamAlumniNETBackend.Models
         public string? Status { get; set; }
         public string? Bio { get; set; }
         public string? FunFact { get; set; }
-        public List<Post>? Posts { get; set; }
-        public List<Group>? Groups { get; set; }
-        public List<Event>? Events { get; set; }
-        public List<Topic>? Topics { get; set; }
+        public ICollection<Post>? Posts { get; set; }
+        public ICollection<Group>? Groups { get; set; }
+        public ICollection<Event>? Events { get; set; }
+        public ICollection<Topic>? Topics { get; set; }
     }
 }
