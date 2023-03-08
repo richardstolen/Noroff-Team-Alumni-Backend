@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace TeamAlumniNETBackend.Models
 {
@@ -6,7 +7,7 @@ namespace TeamAlumniNETBackend.Models
     {
         [Key]
         public int EventId { get; set; }
-        public string? CreatedBy { get; set; }
+        public int UserId { get; set; }
         public ICollection<Rsvp>? Rsvps { get; set; }
         public ICollection<Topic>? Topics { get; set; }
         public ICollection<Group>? Groups { get; set; }
