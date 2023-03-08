@@ -1,3 +1,6 @@
+using Microsoft.EntityFrameworkCore;
+using TeamAlumniNETBackend.Data;
+
 namespace TeamAlumniNETBackend
 {
     public class Program
@@ -13,7 +16,16 @@ namespace TeamAlumniNETBackend
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
+            builder.Services.AddDbContext<AlumniDbContext>(options =>
+            {
+                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+            });
+            builder.Services.AddDatabaseDeveloperPageExceptionFilter();
+
             var app = builder.Build();
+
+            // Add Db Context
+            
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
