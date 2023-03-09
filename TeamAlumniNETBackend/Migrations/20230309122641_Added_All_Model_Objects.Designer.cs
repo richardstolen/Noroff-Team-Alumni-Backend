@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TeamAlumniNETBackend.Data;
 
@@ -11,9 +12,10 @@ using TeamAlumniNETBackend.Data;
 namespace TeamAlumniNETBackend.Migrations
 {
     [DbContext(typeof(AlumniDbContext))]
-    partial class AlumniDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230309122641_Added_All_Model_Objects")]
+    partial class Added_All_Model_Objects
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -90,24 +92,12 @@ namespace TeamAlumniNETBackend.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("EventId"), 1L, 1);
 
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<int>("UserId")
                         .HasColumnType("int");
 
                     b.HasKey("EventId");
 
                     b.ToTable("Events");
-
-                    b.HasData(
-                        new
-                        {
-                            EventId = 1,
-                            Description = "Football game",
-                            UserId = 2
-                        });
                 });
 
             modelBuilder.Entity("TeamAlumniNETBackend.Models.Group", b =>
@@ -127,14 +117,6 @@ namespace TeamAlumniNETBackend.Migrations
                     b.HasKey("GroupId");
 
                     b.ToTable("Groups");
-
-                    b.HasData(
-                        new
-                        {
-                            GroupId = 1,
-                            Description = "Group for members of Experis",
-                            Name = "Experis"
-                        });
                 });
 
             modelBuilder.Entity("TeamAlumniNETBackend.Models.Post", b =>
@@ -187,21 +169,6 @@ namespace TeamAlumniNETBackend.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Posts");
-
-                    b.HasData(
-                        new
-                        {
-                            PostId = 1,
-                            Body = "Invite to all who like football to watch the match",
-                            LastUpdate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TargetEvent = 1,
-                            TargetGroup = 1,
-                            TargetPost = 1,
-                            TargetTopic = 1,
-                            TargetUser = 1,
-                            Title = "Footbal Match",
-                            UserId = 1
-                        });
                 });
 
             modelBuilder.Entity("TeamAlumniNETBackend.Models.Rsvp", b =>
@@ -253,14 +220,6 @@ namespace TeamAlumniNETBackend.Migrations
                     b.HasKey("TopicId");
 
                     b.ToTable("Topics");
-
-                    b.HasData(
-                        new
-                        {
-                            TopicId = 1,
-                            Description = "Topic for people who love football",
-                            Name = "Football"
-                        });
                 });
 
             modelBuilder.Entity("TeamAlumniNETBackend.Models.User", b =>
@@ -294,20 +253,8 @@ namespace TeamAlumniNETBackend.Migrations
                         new
                         {
                             UserId = 1,
-                            Bio = "Love Futsal and footbal",
-                            FunFact = "never watched a whole footballmatch",
-                            Image = "https://upload.wikimedia.org/wikipedia/commons/a/a5/Ricardinho_on_Benfica_%28cropped%29.jpg",
-                            Status = "Attending Experis Academy courses at Noroff",
-                            UserName = "Richardinho"
-                        },
-                        new
-                        {
-                            UserId = 2,
-                            Bio = "Striker at Manchester United",
-                            FunFact = "Almost never score",
-                            Image = "https://resources.premierleague.com/photos/2023/01/30/46dfc1c6-ccfd-4ad5-8d5a-79a6eceee104/Weghorst-Man-Utd.jpg?width=930&height=620",
-                            Status = "Attending Experis Academy courses at Noroff",
-                            UserName = "Kjetilinho"
+                            Bio = "Happy boy",
+                            UserName = "richardinho"
                         });
                 });
 

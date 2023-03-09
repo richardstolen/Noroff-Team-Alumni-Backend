@@ -18,11 +18,11 @@ namespace TeamAlumniNETBackend.Data
         }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            User user = new User();
-            user.UserId = 1;
-            user.UserName = "richardinho";
-            user.Bio = "Happy boy";
-            modelBuilder.Entity<User>().HasData(user);
+            modelBuilder.Entity<Group>().HasData(DataSeeder.GetGroups());
+            modelBuilder.Entity<Topic>().HasData(DataSeeder.GetTopics());
+            modelBuilder.Entity<Event>().HasData(DataSeeder.GetEvents());
+            modelBuilder.Entity<Post>().HasData(DataSeeder.GetPosts());
+            modelBuilder.Entity<User>().HasData(DataSeeder.GetUsers());
         }
     }
 }

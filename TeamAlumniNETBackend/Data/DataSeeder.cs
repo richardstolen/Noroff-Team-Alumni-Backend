@@ -30,10 +30,6 @@ namespace TeamAlumniNETBackend.Data
                 Status = "Attending Experis Academy courses at Noroff",
                 Bio = "Striker at Manchester United",
                 FunFact = "Almost never score",
-                Posts = GetPosts(),
-                Groups = GetGroups(),
-                Events = GetEvents(),
-                Topics = GetTopics()
             });
             return createUsers;
         }
@@ -45,9 +41,7 @@ namespace TeamAlumniNETBackend.Data
                 GroupId = 1,
                 Name = "Experis",
                 Description = "Group for members of Experis",
-                Events = GetEvents(),
-                Users = GetUsers(),
-                Posts = GetPosts()
+
             });
             return createGroups;
         }
@@ -59,9 +53,6 @@ namespace TeamAlumniNETBackend.Data
                 TopicId = 1,
                 Name = "Football",
                 Description = "Topic for people who love football",
-                Users = GetUsers(),
-                Posts = GetPosts(),
-                Events = GetEvents(),
             });
             return createTopics;
         }
@@ -73,10 +64,7 @@ namespace TeamAlumniNETBackend.Data
             {
                 EventId = 1,
                 UserId = 2,
-                Rsvps = GetRsvps(),
-                Topics = GetTopics(),
-                Groups = GetGroups(),
-                Users = GetUsers()
+                Description = "Football game"
             });
             return createEvents;
         }
@@ -87,8 +75,6 @@ namespace TeamAlumniNETBackend.Data
             createRsvps.Add(new Rsvp()
             {
                 RsvpId = 1,
-                Event = GetEvents()[0],
-                User = GetUsers()[0],
                 LastUpdate = new DateTime(),
                 Accepted = true,
                 GuestCount = 1
@@ -101,7 +87,7 @@ namespace TeamAlumniNETBackend.Data
             createPosts.Add(new Post()
             {
                 PostId = 1,
-                UserId = 2,
+                UserId = 1,
                 Title = "Footbal Match",
                 Body = "Invite to all who like football to watch the match",
                 LastUpdate = new DateTime(),
