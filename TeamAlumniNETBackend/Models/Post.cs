@@ -12,10 +12,10 @@ namespace TeamAlumniNETBackend.Models
         public string? Title { get; set; }
         public string? Body { get; set; }
         public DateTime LastUpdate { get; set; }
-        public string? TargetPost { get; set; }
-        public string? TargetUser { get; set; }
-        public string? TargetGroup { get; set; }
-        public string? TargetTopic { get; set; }
-        public string? TargetEvent { get; set; }
+        public int? TargetPost { get; set; }
+        public int? TargetUser { get; set; }
+        public int? TargetGroup { get; set; }
+        public int? TargetTopic { get; set; }
+        public int? TargetEvent { get; set; }
     }
 }
