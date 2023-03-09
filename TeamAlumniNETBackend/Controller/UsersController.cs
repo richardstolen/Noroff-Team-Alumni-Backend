@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -42,34 +44,39 @@ namespace TeamAlumniNETBackend.Controller
             return user;
         }
 
-        // PUT: api/Users/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutUser(int id, User user)
+
+
+        /// <summary>
+        /// Update specific properties on User object
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="user"></param>
+        /// <returns></returns>
+        [HttpPatch("{id}")] // PATCH: api/Users/id
+        public async Task<IActionResult> PatchUser(int id, User user)
         {
-            if (id != user.UserId)
+            // Find existing entity
+            var existingEntity = await _context.Users.FindAsync(id);
+
+            // Handle not found
+            if (existingEntity == null)
             {
-                return BadRequest();
+                return NotFound();
             }
 
-            _context.Entry(user).State = EntityState.Modified;
-
-            try
+            // Iterate through all of the properties of the update object
+            foreach (PropertyInfo prop in user.GetType().GetProperties())
             {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!UserExists(id))
+                // Check if the property has been set in the updateObject
+                if (prop.GetValue(user) != null)
                 {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
+                    // If it has been set update the existing entity value
+                    existingEntity.GetType().GetProperty(prop.Name)?.SetValue(existingEntity, prop.GetValue(user));
                 }
             }
 
+            // Save to DB
+            await _context.SaveChangesAsync();
             return NoContent();
         }
 
