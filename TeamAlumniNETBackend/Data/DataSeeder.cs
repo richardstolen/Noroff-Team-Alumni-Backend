@@ -91,11 +91,11 @@ namespace TeamAlumniNETBackend.Data
                 Title = "Footbal Match",
                 Body = "Invite to all who like football to watch the match",
                 LastUpdate = new DateTime(),
-                TargetPost = 1,
-                TargetUser = 1,
-                TargetGroup = 1,
-                TargetEvent = 1,
-                TargetTopic = 1
+                TargetPost = -1,
+                TargetUser = -1,
+                TargetGroup = -1,
+                TargetEvent = -1,
+                TargetTopic = -1
             });
             return createPosts;
         }
