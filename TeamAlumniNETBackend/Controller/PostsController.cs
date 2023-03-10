@@ -25,7 +25,10 @@ namespace TeamAlumniNETBackend.Controller
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Post>>> GetPosts()
         {
-            return await _context.Posts.ToListAsync();
+            var posts = await _context.Posts.ToListAsync();
+            posts.Reverse();
+            return posts;
+           
         }
 
         // GET: api/Posts/5
