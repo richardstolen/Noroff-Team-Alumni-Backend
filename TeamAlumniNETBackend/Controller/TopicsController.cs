@@ -100,6 +100,31 @@ namespace TeamAlumniNETBackend.Controller
             return NoContent();
         }
 
+        [HttpPost("{id}/join")] // POST: /topic/:topic_id/join
+        public async Task<IActionResult> AddUserToTopic(int id)
+        {
+            // TODO MUST CHANGE TO USER REQUESTING
+            int user_id = 1;
+
+            // Get User and Topic
+            var user = await _context.Users.FindAsync(user_id);
+            var topic = await _context.Topics.FindAsync(id);
+
+            // Handle Not Found
+            if (topic == null || user == null)
+            {
+                return NotFound();
+            }
+
+            // Add User to Topic
+            topic.Users.Add(user);
+
+            // Save
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
+
         private bool TopicExists(int id)
         {
             return _context.Topics.Any(e => e.TopicId == id);
