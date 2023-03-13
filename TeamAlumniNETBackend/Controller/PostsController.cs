@@ -21,19 +21,10 @@ namespace TeamAlumniNETBackend.Controller
             _context = context;
         }
 
-        // GET:Post
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<Post>>> GetPosts()
-        {
-            var posts = await _context.Posts.ToListAsync();
-            posts.Reverse();
-            return posts;
-
-        }
 
         // Get/post/user
-        [HttpGet("/user/{id}")]
-        public async Task<ActionResult<IEnumerable<Post>>> GetPosts(Guid id)
+        [HttpGet("get/post/user")]
+        public async Task<ActionResult<IEnumerable<Post>>> GetPosts([FromHeader] Guid id)
         {
             var postList = await _context.Posts.Where(post => post.TargetUser == id).ToListAsync();
 
@@ -44,6 +35,54 @@ namespace TeamAlumniNETBackend.Controller
 
             return postList;
         }
+
+        // Get/post/user/user_id
+
+        [HttpGet("get/post/user/user_id")]
+
+        public async Task<ActionResult<IEnumerable<Post>>> GetPostsByID(Guid userId , [FromHeader] Guid targetUser)
+        {
+            var directPost = await _context.Posts.Where(Post => Post.TargetUser == targetUser).Where(Post => Post.UserId == userId).ToListAsync();
+          
+
+            if (directPost == null) 
+            {
+                return NotFound();
+            }
+            return directPost;
+        }
+
+        // Get /post/group/:grouo_id
+
+        [HttpGet("post/group/group_id")]
+        public async Task<ActionResult<IEnumerable<Post>>> GetPostsByGroup([FromHeader] int targetGroup) 
+        {
+            var groupPost = await _context.Posts.Where(Post => Post.TargetGroup == targetGroup).ToListAsync();
+
+            if (groupPost == null) 
+            {
+                return NotFound();
+            }
+            return groupPost;    
+        }
+
+        // Get /post/topic/:topic_id
+
+        [HttpGet("Post/Topic/topic_id")]
+        public async Task<ActionResult<IEnumerable<Post>>> GetPostsByTopic([FromHeader] int targetTopic) 
+        {
+            var topicPost = await _context.Posts.Where(Post => Post.TargetTopic == targetTopic).ToListAsync();
+
+            if (topicPost == null)
+            {
+                return NotFound();                   
+            }
+            return topicPost;
+        }
+
+
+
+
 
         // GET: api/Posts/5
         [HttpGet("{id}")]
@@ -58,6 +97,8 @@ namespace TeamAlumniNETBackend.Controller
 
             return post;
         }
+
+
 
         // PUT: api/Posts/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
