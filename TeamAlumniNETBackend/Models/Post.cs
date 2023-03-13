@@ -13,7 +13,7 @@ namespace TeamAlumniNETBackend.Models
         public string? Body { get; set; }
         public DateTime LastUpdate { get; set; }
         public int? TargetPost { get; set; }
-        public int? TargetUser { get; set; }
+        public Guid? TargetUser { get; set; }
         public int? TargetGroup { get; set; }
         public int? TargetTopic { get; set; }
         public int? TargetEvent { get; set; }

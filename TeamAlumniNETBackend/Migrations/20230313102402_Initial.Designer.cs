@@ -12,7 +12,7 @@ using TeamAlumniNETBackend.Data;
 namespace TeamAlumniNETBackend.Migrations
 {
     [DbContext(typeof(AlumniDbContext))]
-    [Migration("20230313094136_Initial")]
+    [Migration("20230313102402_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -170,8 +170,8 @@ namespace TeamAlumniNETBackend.Migrations
                     b.Property<int?>("TargetTopic")
                         .HasColumnType("int");
 
-                    b.Property<int?>("TargetUser")
-                        .HasColumnType("int");
+                    b.Property<Guid?>("TargetUser")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Title")
                         .HasColumnType("nvarchar(max)");
@@ -191,11 +191,6 @@ namespace TeamAlumniNETBackend.Migrations
                             PostId = 1,
                             Body = "Invite to all who like football to watch the match",
                             LastUpdate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            TargetEvent = -1,
-                            TargetGroup = -1,
-                            TargetPost = -1,
-                            TargetTopic = -1,
-                            TargetUser = -1,
                             Title = "Footbal Match"
                         });
                 });
@@ -287,7 +282,7 @@ namespace TeamAlumniNETBackend.Migrations
                     b.HasData(
                         new
                         {
-                            UserId = new Guid("380606c7-68b9-4600-9cae-2ceaef9961f5"),
+                            UserId = new Guid("ee1b03f4-ac5f-42d8-9562-4fc82e55197b"),
                             Bio = "Love Futsal and footbal",
                             FunFact = "never watched a whole footballmatch",
                             Image = "https://upload.wikimedia.org/wikipedia/commons/a/a5/Ricardinho_on_Benfica_%28cropped%29.jpg",
@@ -296,7 +291,7 @@ namespace TeamAlumniNETBackend.Migrations
                         },
                         new
                         {
-                            UserId = new Guid("07276982-d8ed-432e-9529-5a5b6cd1939c"),
+                            UserId = new Guid("14d229c9-5428-4456-8b54-8e9646103dfc"),
                             Bio = "Striker at Manchester United",
                             FunFact = "Almost never score",
                             Image = "https://resources.premierleague.com/photos/2023/01/30/46dfc1c6-ccfd-4ad5-8d5a-79a6eceee104/Weghorst-Man-Utd.jpg?width=930&height=620",

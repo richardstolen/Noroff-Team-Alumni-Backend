@@ -33,20 +33,20 @@ namespace TeamAlumniNETBackend.Controller
 
         // Get/post/user
         [HttpGet("/user/{id}")]
-        public async Task<ActionResult<IEnumerable<Post>>> GetPosts(int id)
+        public async Task<ActionResult<IEnumerable<Post>>> GetPosts(Guid id)
         {
-            var postList = await _context.Posts.Where(post => post.TargetUser == id ).ToListAsync();
-            
+            var postList = await _context.Posts.Where(post => post.TargetUser == id).ToListAsync();
+
             if (postList == null)
             {
                 return NotFound();
             }
 
-            return postList ;
+            return postList;
         }
 
-            // GET: api/Posts/5
-            [HttpGet("{id}")]
+        // GET: api/Posts/5
+        [HttpGet("{id}")]
         public async Task<ActionResult<Post>> GetPost(int id)
         {
             var post = await _context.Posts.FindAsync(id);

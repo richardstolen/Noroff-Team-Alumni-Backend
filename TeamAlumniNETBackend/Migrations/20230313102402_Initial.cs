@@ -176,7 +176,7 @@ namespace TeamAlumniNETBackend.Migrations
                     Body = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     LastUpdate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     TargetPost = table.Column<int>(type: "int", nullable: true),
-                    TargetUser = table.Column<int>(type: "int", nullable: true),
+                    TargetUser = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     TargetGroup = table.Column<int>(type: "int", nullable: true),
                     TargetTopic = table.Column<int>(type: "int", nullable: true),
                     TargetEvent = table.Column<int>(type: "int", nullable: true)
@@ -255,7 +255,7 @@ namespace TeamAlumniNETBackend.Migrations
             migrationBuilder.InsertData(
                 table: "Posts",
                 columns: new[] { "PostId", "Body", "LastUpdate", "TargetEvent", "TargetGroup", "TargetPost", "TargetTopic", "TargetUser", "Title", "UserId" },
-                values: new object[] { 1, "Invite to all who like football to watch the match", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), -1, -1, -1, -1, -1, "Footbal Match", null });
+                values: new object[] { 1, "Invite to all who like football to watch the match", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null, null, null, null, null, "Footbal Match", null });
 
             migrationBuilder.InsertData(
                 table: "Topics",
@@ -267,8 +267,8 @@ namespace TeamAlumniNETBackend.Migrations
                 columns: new[] { "UserId", "Bio", "FunFact", "Image", "Status", "UserName" },
                 values: new object[,]
                 {
-                    { new Guid("07276982-d8ed-432e-9529-5a5b6cd1939c"), "Striker at Manchester United", "Almost never score", "https://resources.premierleague.com/photos/2023/01/30/46dfc1c6-ccfd-4ad5-8d5a-79a6eceee104/Weghorst-Man-Utd.jpg?width=930&height=620", "Attending Experis Academy courses at Noroff", "Kjetilinho" },
-                    { new Guid("380606c7-68b9-4600-9cae-2ceaef9961f5"), "Love Futsal and footbal", "never watched a whole footballmatch", "https://upload.wikimedia.org/wikipedia/commons/a/a5/Ricardinho_on_Benfica_%28cropped%29.jpg", "Attending Experis Academy courses at Noroff", "Richardinho" }
+                    { new Guid("14d229c9-5428-4456-8b54-8e9646103dfc"), "Striker at Manchester United", "Almost never score", "https://resources.premierleague.com/photos/2023/01/30/46dfc1c6-ccfd-4ad5-8d5a-79a6eceee104/Weghorst-Man-Utd.jpg?width=930&height=620", "Attending Experis Academy courses at Noroff", "Kjetilinho" },
+                    { new Guid("ee1b03f4-ac5f-42d8-9562-4fc82e55197b"), "Love Futsal and footbal", "never watched a whole footballmatch", "https://upload.wikimedia.org/wikipedia/commons/a/a5/Ricardinho_on_Benfica_%28cropped%29.jpg", "Attending Experis Academy courses at Noroff", "Richardinho" }
                 });
 
             migrationBuilder.CreateIndex(
