@@ -32,9 +32,9 @@ namespace TeamAlumniNETBackend.Controller
             return await _context.Users.ToListAsync();
         }
 
-        // GET: api/Users/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<User>> GetUser(Guid id)
+
+        [HttpGet("id/{id}")]  // GET: api/Users/id/{id}
+        public async Task<ActionResult<User>> GetUserById(Guid id)
         {
             var user = await _context.Users.FindAsync(id);
 
@@ -46,7 +46,23 @@ namespace TeamAlumniNETBackend.Controller
             return user;
         }
 
+        /// <summary>
+        /// Get User by username. Usernames are unique.
+        /// </summary>
+        /// <param name="username"></param>
+        /// <returns>200: User object <br/>404: Not Found </returns>
+        [HttpGet("username/{username}")]  // GET: api/Users/username/{username}
+        public async Task<ActionResult<User>> GetUserByUsername(string username)
+        {
+            var user = await _context.Users.Where(user => user.UserName == username).FirstOrDefaultAsync();
 
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            return user;
+        }
 
         /// <summary>
         /// Update specific properties on User object
