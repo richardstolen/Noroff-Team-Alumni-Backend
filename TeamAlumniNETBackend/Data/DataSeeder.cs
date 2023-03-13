@@ -10,7 +10,7 @@ namespace TeamAlumniNETBackend.Data
             List<User> createUsers = new List<User>();
             createUsers.Add(new User()
             {
-                UserId = 1,
+                UserId = Guid.NewGuid(),
                 UserName = "Richardinho",
                 Image = "https://upload.wikimedia.org/wikipedia/commons/a/a5/Ricardinho_on_Benfica_%28cropped%29.jpg",
                 Status = "Attending Experis Academy courses at Noroff",
@@ -24,7 +24,7 @@ namespace TeamAlumniNETBackend.Data
 
             createUsers.Add(new User()
             {
-                UserId = 2,
+                UserId = Guid.NewGuid(),
                 UserName = "Kjetilinho",
                 Image = "https://resources.premierleague.com/photos/2023/01/30/46dfc1c6-ccfd-4ad5-8d5a-79a6eceee104/Weghorst-Man-Utd.jpg?width=930&height=620",
                 Status = "Attending Experis Academy courses at Noroff",
@@ -39,6 +39,7 @@ namespace TeamAlumniNETBackend.Data
             createGroups.Add(new Group()
             {
                 GroupId = 1,
+                CreatedBy = null,
                 Name = "Experis",
                 Description = "Group for members of Experis",
 
@@ -63,7 +64,7 @@ namespace TeamAlumniNETBackend.Data
             createEvents.Add(new Event()
             {
                 EventId = 1,
-                UserId = 2,
+                UserId = null,
                 Description = "Football game"
             });
             return createEvents;
@@ -87,7 +88,7 @@ namespace TeamAlumniNETBackend.Data
             createPosts.Add(new Post()
             {
                 PostId = 1,
-                UserId = 1,
+                UserId = null,
                 Title = "Footbal Match",
                 Body = "Invite to all who like football to watch the match",
                 LastUpdate = new DateTime(),

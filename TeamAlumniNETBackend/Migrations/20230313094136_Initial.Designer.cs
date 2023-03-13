@@ -12,8 +12,8 @@ using TeamAlumniNETBackend.Data;
 namespace TeamAlumniNETBackend.Migrations
 {
     [DbContext(typeof(AlumniDbContext))]
-    [Migration("20230309122641_Added_All_Model_Objects")]
-    partial class Added_All_Model_Objects
+    [Migration("20230313094136_Initial")]
+    partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -59,8 +59,8 @@ namespace TeamAlumniNETBackend.Migrations
                     b.Property<int>("EventsEventId")
                         .HasColumnType("int");
 
-                    b.Property<int>("UsersUserId")
-                        .HasColumnType("int");
+                    b.Property<Guid>("UsersUserId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("EventsEventId", "UsersUserId");
 
@@ -74,8 +74,8 @@ namespace TeamAlumniNETBackend.Migrations
                     b.Property<int>("GroupsGroupId")
                         .HasColumnType("int");
 
-                    b.Property<int>("UsersUserId")
-                        .HasColumnType("int");
+                    b.Property<Guid>("UsersUserId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("GroupsGroupId", "UsersUserId");
 
@@ -92,12 +92,23 @@ namespace TeamAlumniNETBackend.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("EventId"), 1L, 1);
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("EventId");
 
                     b.ToTable("Events");
+
+                    b.HasData(
+                        new
+                        {
+                            EventId = 1,
+                            Description = "Football game"
+                        });
                 });
 
             modelBuilder.Entity("TeamAlumniNETBackend.Models.Group", b =>
@@ -108,8 +119,14 @@ namespace TeamAlumniNETBackend.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("GroupId"), 1L, 1);
 
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool?>("IsPrivate")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
@@ -117,6 +134,14 @@ namespace TeamAlumniNETBackend.Migrations
                     b.HasKey("GroupId");
 
                     b.ToTable("Groups");
+
+                    b.HasData(
+                        new
+                        {
+                            GroupId = 1,
+                            Description = "Group for members of Experis",
+                            Name = "Experis"
+                        });
                 });
 
             modelBuilder.Entity("TeamAlumniNETBackend.Models.Post", b =>
@@ -129,9 +154,6 @@ namespace TeamAlumniNETBackend.Migrations
 
                     b.Property<string>("Body")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("GroupId")
-                        .HasColumnType("int");
 
                     b.Property<DateTime>("LastUpdate")
                         .HasColumnType("datetime2");
@@ -154,21 +176,28 @@ namespace TeamAlumniNETBackend.Migrations
                     b.Property<string>("Title")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("TopicId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("PostId");
-
-                    b.HasIndex("GroupId");
-
-                    b.HasIndex("TopicId");
 
                     b.HasIndex("UserId");
 
                     b.ToTable("Posts");
+
+                    b.HasData(
+                        new
+                        {
+                            PostId = 1,
+                            Body = "Invite to all who like football to watch the match",
+                            LastUpdate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            TargetEvent = -1,
+                            TargetGroup = -1,
+                            TargetPost = -1,
+                            TargetTopic = -1,
+                            TargetUser = -1,
+                            Title = "Footbal Match"
+                        });
                 });
 
             modelBuilder.Entity("TeamAlumniNETBackend.Models.Rsvp", b =>
@@ -191,8 +220,8 @@ namespace TeamAlumniNETBackend.Migrations
                     b.Property<DateTime>("LastUpdate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int?>("UserId")
-                        .HasColumnType("int");
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("RsvpId");
 
@@ -220,15 +249,21 @@ namespace TeamAlumniNETBackend.Migrations
                     b.HasKey("TopicId");
 
                     b.ToTable("Topics");
+
+                    b.HasData(
+                        new
+                        {
+                            TopicId = 1,
+                            Description = "Topic for people who love football",
+                            Name = "Football"
+                        });
                 });
 
             modelBuilder.Entity("TeamAlumniNETBackend.Models.User", b =>
                 {
-                    b.Property<int>("UserId")
+                    b.Property<Guid>("UserId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("UserId"), 1L, 1);
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Bio")
                         .HasColumnType("nvarchar(max)");
@@ -252,9 +287,21 @@ namespace TeamAlumniNETBackend.Migrations
                     b.HasData(
                         new
                         {
-                            UserId = 1,
-                            Bio = "Happy boy",
-                            UserName = "richardinho"
+                            UserId = new Guid("380606c7-68b9-4600-9cae-2ceaef9961f5"),
+                            Bio = "Love Futsal and footbal",
+                            FunFact = "never watched a whole footballmatch",
+                            Image = "https://upload.wikimedia.org/wikipedia/commons/a/a5/Ricardinho_on_Benfica_%28cropped%29.jpg",
+                            Status = "Attending Experis Academy courses at Noroff",
+                            UserName = "Richardinho"
+                        },
+                        new
+                        {
+                            UserId = new Guid("07276982-d8ed-432e-9529-5a5b6cd1939c"),
+                            Bio = "Striker at Manchester United",
+                            FunFact = "Almost never score",
+                            Image = "https://resources.premierleague.com/photos/2023/01/30/46dfc1c6-ccfd-4ad5-8d5a-79a6eceee104/Weghorst-Man-Utd.jpg?width=930&height=620",
+                            Status = "Attending Experis Academy courses at Noroff",
+                            UserName = "Kjetilinho"
                         });
                 });
 
@@ -263,8 +310,8 @@ namespace TeamAlumniNETBackend.Migrations
                     b.Property<int>("TopicsTopicId")
                         .HasColumnType("int");
 
-                    b.Property<int>("UsersUserId")
-                        .HasColumnType("int");
+                    b.Property<Guid>("UsersUserId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("TopicsTopicId", "UsersUserId");
 
@@ -335,19 +382,9 @@ namespace TeamAlumniNETBackend.Migrations
 
             modelBuilder.Entity("TeamAlumniNETBackend.Models.Post", b =>
                 {
-                    b.HasOne("TeamAlumniNETBackend.Models.Group", null)
-                        .WithMany("Posts")
-                        .HasForeignKey("GroupId");
-
-                    b.HasOne("TeamAlumniNETBackend.Models.Topic", null)
-                        .WithMany("Posts")
-                        .HasForeignKey("TopicId");
-
                     b.HasOne("TeamAlumniNETBackend.Models.User", null)
                         .WithMany("Posts")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("UserId");
                 });
 
             modelBuilder.Entity("TeamAlumniNETBackend.Models.Rsvp", b =>
@@ -383,16 +420,6 @@ namespace TeamAlumniNETBackend.Migrations
             modelBuilder.Entity("TeamAlumniNETBackend.Models.Event", b =>
                 {
                     b.Navigation("Rsvps");
-                });
-
-            modelBuilder.Entity("TeamAlumniNETBackend.Models.Group", b =>
-                {
-                    b.Navigation("Posts");
-                });
-
-            modelBuilder.Entity("TeamAlumniNETBackend.Models.Topic", b =>
-                {
-                    b.Navigation("Posts");
                 });
 
             modelBuilder.Entity("TeamAlumniNETBackend.Models.User", b =>

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
@@ -102,9 +103,11 @@ namespace TeamAlumniNETBackend.Controller
 
 
         [HttpPost("{id}/join")]
-        public async Task<IActionResult> AddUserToGroup(int id, int user_id)
+        public async Task<IActionResult> AddUserToGroup(int id, [FromBody] int user_id, [FromHeader] int admin_id)
         {
-
+            Debug.WriteLine("Group id: " + id);
+            Debug.WriteLine("User id: " + user_id);
+            Debug.WriteLine("Admin id: " + admin_id);
             //int user_id = 1;
 
             //Get user and Group

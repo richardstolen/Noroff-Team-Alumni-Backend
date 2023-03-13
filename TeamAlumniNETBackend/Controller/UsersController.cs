@@ -34,7 +34,7 @@ namespace TeamAlumniNETBackend.Controller
 
         // GET: api/Users/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<User>> GetUser(int id)
+        public async Task<ActionResult<User>> GetUser(Guid id)
         {
             var user = await _context.Users.FindAsync(id);
 
@@ -55,7 +55,7 @@ namespace TeamAlumniNETBackend.Controller
         /// <param name="user"></param>
         /// <returns></returns>
         [HttpPatch("{id}")] // PATCH: api/Users/id
-        public async Task<IActionResult> PatchUser(int id, User user)
+        public async Task<IActionResult> PatchUser(Guid id, User user)
         {
             // Find existing entity
             var existingEntity = await _context.Users.FindAsync(id);
@@ -95,7 +95,7 @@ namespace TeamAlumniNETBackend.Controller
 
         // DELETE: api/Users/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteUser(int id)
+        public async Task<IActionResult> DeleteUser(Guid id)
         {
             var user = await _context.Users.FindAsync(id);
             if (user == null)
@@ -109,7 +109,7 @@ namespace TeamAlumniNETBackend.Controller
             return NoContent();
         }
 
-        private bool UserExists(int id)
+        private bool UserExists(Guid id)
         {
             return _context.Users.Any(e => e.UserId == id);
         }
