@@ -13,7 +13,7 @@ using TeamAlumniNETBackend.Models;
 
 namespace TeamAlumniNETBackend.Controller
 {
-    [Route("api/[controller]")]
+    [Route("")]
     [ApiController]
     public class UsersController : ControllerBase
     {
@@ -25,18 +25,17 @@ namespace TeamAlumniNETBackend.Controller
         }
 
         // GET: api/Users
-        [HttpGet]
-        [Authorize]
+        [HttpGet("/user")]
         public async Task<ActionResult<IEnumerable<User>>> GetUsers()
         {
             return await _context.Users.ToListAsync();
         }
 
 
-        [HttpGet("id/{id}")]  // GET: api/Users/id/{id}
-        public async Task<ActionResult<User>> GetUserById(Guid id)
+        [HttpGet("user/{user_id}")]  // GET: api/Users/id/{id}
+        public async Task<ActionResult<User>> GetUserById(Guid user_id)
         {
-            var user = await _context.Users.FindAsync(id);
+            var user = await _context.Users.FindAsync(user_id);
 
             if (user == null)
             {
@@ -51,7 +50,7 @@ namespace TeamAlumniNETBackend.Controller
         /// </summary>
         /// <param name="username"></param>
         /// <returns>200: User object <br/>404: Not Found </returns>
-        [HttpGet("username/{username}")]  // GET: api/Users/username/{username}
+        [HttpGet("user/{username}")]  // GET: api/Users/username/{username}
         public async Task<ActionResult<User>> GetUserByUsername(string username)
         {
             var user = await _context.Users.Where(user => user.UserName == username).FirstOrDefaultAsync();
@@ -70,11 +69,11 @@ namespace TeamAlumniNETBackend.Controller
         /// <param name="id"></param>
         /// <param name="user"></param>
         /// <returns></returns>
-        [HttpPatch("{id}")] // PATCH: api/Users/id
-        public async Task<IActionResult> PatchUser(Guid id, User user)
+        [HttpPatch("/user/{user_id}")] // PATCH: api/Users/id
+        public async Task<IActionResult> PatchUser(Guid user_id, User user)
         {
             // Find existing entity
-            var existingEntity = await _context.Users.FindAsync(id);
+            var existingEntity = await _context.Users.FindAsync(user_id);
 
             // Handle not found
             if (existingEntity == null)
@@ -100,7 +99,7 @@ namespace TeamAlumniNETBackend.Controller
 
         // POST: api/Users
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
+        [HttpPost("/user")]
         public async Task<ActionResult<User>> PostUser(User user)
         {
             _context.Users.Add(user);
@@ -110,10 +109,10 @@ namespace TeamAlumniNETBackend.Controller
         }
 
         // DELETE: api/Users/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteUser(Guid id)
+        [HttpDelete("/user/{user_id}")]
+        public async Task<IActionResult> DeleteUser(Guid user_id)
         {
-            var user = await _context.Users.FindAsync(id);
+            var user = await _context.Users.FindAsync(user_id);
             if (user == null)
             {
                 return NotFound();
