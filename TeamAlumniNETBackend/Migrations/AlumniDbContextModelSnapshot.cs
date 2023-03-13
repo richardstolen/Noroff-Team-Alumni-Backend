@@ -57,8 +57,8 @@ namespace TeamAlumniNETBackend.Migrations
                     b.Property<int>("EventsEventId")
                         .HasColumnType("int");
 
-                    b.Property<int>("UsersUserId")
-                        .HasColumnType("int");
+                    b.Property<Guid>("UsersUserId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("EventsEventId", "UsersUserId");
 
@@ -72,8 +72,8 @@ namespace TeamAlumniNETBackend.Migrations
                     b.Property<int>("GroupsGroupId")
                         .HasColumnType("int");
 
-                    b.Property<int>("UsersUserId")
-                        .HasColumnType("int");
+                    b.Property<Guid>("UsersUserId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("GroupsGroupId", "UsersUserId");
 
@@ -94,8 +94,8 @@ namespace TeamAlumniNETBackend.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("EventId");
 
@@ -105,8 +105,7 @@ namespace TeamAlumniNETBackend.Migrations
                         new
                         {
                             EventId = 1,
-                            Description = "Football game",
-                            UserId = 2
+                            Description = "Football game"
                         });
                 });
 
@@ -118,8 +117,14 @@ namespace TeamAlumniNETBackend.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("GroupId"), 1L, 1);
 
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool?>("IsPrivate")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
@@ -169,8 +174,8 @@ namespace TeamAlumniNETBackend.Migrations
                     b.Property<string>("Title")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("PostId");
 
@@ -189,8 +194,7 @@ namespace TeamAlumniNETBackend.Migrations
                             TargetPost = -1,
                             TargetTopic = -1,
                             TargetUser = -1,
-                            Title = "Footbal Match",
-                            UserId = 1
+                            Title = "Footbal Match"
                         });
                 });
 
@@ -214,8 +218,8 @@ namespace TeamAlumniNETBackend.Migrations
                     b.Property<DateTime>("LastUpdate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int?>("UserId")
-                        .HasColumnType("int");
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("RsvpId");
 
@@ -255,11 +259,9 @@ namespace TeamAlumniNETBackend.Migrations
 
             modelBuilder.Entity("TeamAlumniNETBackend.Models.User", b =>
                 {
-                    b.Property<int>("UserId")
+                    b.Property<Guid>("UserId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("UserId"), 1L, 1);
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Bio")
                         .HasColumnType("nvarchar(max)");
@@ -283,7 +285,7 @@ namespace TeamAlumniNETBackend.Migrations
                     b.HasData(
                         new
                         {
-                            UserId = 1,
+                            UserId = new Guid("380606c7-68b9-4600-9cae-2ceaef9961f5"),
                             Bio = "Love Futsal and footbal",
                             FunFact = "never watched a whole footballmatch",
                             Image = "https://upload.wikimedia.org/wikipedia/commons/a/a5/Ricardinho_on_Benfica_%28cropped%29.jpg",
@@ -292,7 +294,7 @@ namespace TeamAlumniNETBackend.Migrations
                         },
                         new
                         {
-                            UserId = 2,
+                            UserId = new Guid("07276982-d8ed-432e-9529-5a5b6cd1939c"),
                             Bio = "Striker at Manchester United",
                             FunFact = "Almost never score",
                             Image = "https://resources.premierleague.com/photos/2023/01/30/46dfc1c6-ccfd-4ad5-8d5a-79a6eceee104/Weghorst-Man-Utd.jpg?width=930&height=620",
@@ -306,8 +308,8 @@ namespace TeamAlumniNETBackend.Migrations
                     b.Property<int>("TopicsTopicId")
                         .HasColumnType("int");
 
-                    b.Property<int>("UsersUserId")
-                        .HasColumnType("int");
+                    b.Property<Guid>("UsersUserId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("TopicsTopicId", "UsersUserId");
 
@@ -380,9 +382,7 @@ namespace TeamAlumniNETBackend.Migrations
                 {
                     b.HasOne("TeamAlumniNETBackend.Models.User", null)
                         .WithMany("Posts")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("UserId");
                 });
 
             modelBuilder.Entity("TeamAlumniNETBackend.Models.Rsvp", b =>

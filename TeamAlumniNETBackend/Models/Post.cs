@@ -8,7 +8,7 @@ namespace TeamAlumniNETBackend.Models
         [Key]
         public int PostId { get; set; }
 
-        public int UserId { get; set; }
+        public Guid? UserId { get; set; }
         public string? Title { get; set; }
         public string? Body { get; set; }
         public DateTime LastUpdate { get; set; }
