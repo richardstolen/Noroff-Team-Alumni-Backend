@@ -24,15 +24,23 @@ namespace TeamAlumniNETBackend.Controller
             _context = context;
         }
 
-        // GET: api/Users
-        [HttpGet("/user")]
+        /// <summary>
+        /// Get all Users.
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("/users")]
+
         public async Task<ActionResult<IEnumerable<User>>> GetUsers()
         {
             return await _context.Users.ToListAsync();
         }
 
-
-        [HttpGet("user/{user_id}")]  // GET: api/Users/id/{id}
+        /// <summary>
+        /// Get User by ID.
+        /// </summary>
+        /// <param name="user_id"></param>
+        /// <returns></returns>
+        [HttpGet("user/{user_id}")]
         public async Task<ActionResult<User>> GetUserById(Guid user_id)
         {
             var user = await _context.Users.FindAsync(user_id);
@@ -50,7 +58,7 @@ namespace TeamAlumniNETBackend.Controller
         /// </summary>
         /// <param name="username"></param>
         /// <returns>200: User object <br/>404: Not Found </returns>
-        [HttpGet("user/{username}")]  // GET: api/Users/username/{username}
+        [HttpGet("user/username/{username}")]
         public async Task<ActionResult<User>> GetUserByUsername(string username)
         {
             var user = await _context.Users.Where(user => user.UserName == username).FirstOrDefaultAsync();
@@ -69,7 +77,7 @@ namespace TeamAlumniNETBackend.Controller
         /// <param name="id"></param>
         /// <param name="user"></param>
         /// <returns></returns>
-        [HttpPatch("/user/{user_id}")] // PATCH: api/Users/id
+        [HttpPatch("/user/{user_id}")]
         public async Task<IActionResult> PatchUser(Guid user_id, User user)
         {
             // Find existing entity
@@ -97,8 +105,11 @@ namespace TeamAlumniNETBackend.Controller
             return NoContent();
         }
 
-        // POST: api/Users
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        /// <summary>
+        /// Create new user.
+        /// </summary>
+        /// <param name="user"></param>
+        /// <returns></returns>
         [HttpPost("/user")]
         public async Task<ActionResult<User>> PostUser(User user)
         {
@@ -108,7 +119,11 @@ namespace TeamAlumniNETBackend.Controller
             return CreatedAtAction("GetUser", new { id = user.UserId }, user);
         }
 
-        // DELETE: api/Users/5
+        /// <summary>
+        /// Delete User by id.
+        /// </summary>
+        /// <param name="user_id"></param>
+        /// <returns></returns>
         [HttpDelete("/user/{user_id}")]
         public async Task<IActionResult> DeleteUser(Guid user_id)
         {
