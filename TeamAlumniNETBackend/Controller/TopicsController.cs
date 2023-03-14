@@ -21,18 +21,25 @@ namespace TeamAlumniNETBackend.Controller
             _context = context;
         }
 
-        // GET: api/Topics
-        [HttpGet]
+        /// <summary>
+        /// Get all topics.
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("/topics")]
         public async Task<ActionResult<IEnumerable<Topic>>> GetTopics()
         {
             return await _context.Topics.ToListAsync();
         }
 
-        // GET: api/Topics/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Topic>> GetTopic(int id)
+        /// <summary>
+        /// Get Topic by ID.
+        /// </summary>
+        /// <param name="topic_id"></param>
+        /// <returns></returns>
+        [HttpGet("/topic/{topic_id}")]
+        public async Task<ActionResult<Topic>> GetTopic(int topic_id)
         {
-            var topic = await _context.Topics.FindAsync(id);
+            var topic = await _context.Topics.FindAsync(topic_id);
 
             if (topic == null)
             {
@@ -42,12 +49,16 @@ namespace TeamAlumniNETBackend.Controller
             return topic;
         }
 
-        // PUT: api/Topics/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutTopic(int id, Topic topic)
+        /// <summary>
+        /// Edit topic.
+        /// </summary>
+        /// <param name="topic_id"></param>
+        /// <param name="topic"></param>
+        /// <returns></returns>
+        [HttpPut("/topic/{topic_id}")]
+        public async Task<IActionResult> PutTopic(int topic_id, Topic topic)
         {
-            if (id != topic.TopicId)
+            if (topic_id != topic.TopicId)
             {
                 return BadRequest();
             }
@@ -60,7 +71,7 @@ namespace TeamAlumniNETBackend.Controller
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!TopicExists(id))
+                if (!TopicExists(topic_id))
                 {
                     return NotFound();
                 }
@@ -73,9 +84,12 @@ namespace TeamAlumniNETBackend.Controller
             return NoContent();
         }
 
-        // POST: api/Topics
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
+        /// <summary>
+        /// Create new topic.
+        /// </summary>
+        /// <param name="topic"></param>
+        /// <returns></returns>
+        [HttpPost("/topic")]
         public async Task<ActionResult<Topic>> PostTopic(Topic topic)
         {
             _context.Topics.Add(topic);
@@ -84,11 +98,15 @@ namespace TeamAlumniNETBackend.Controller
             return CreatedAtAction("GetTopic", new { id = topic.TopicId }, topic);
         }
 
-        // DELETE: api/Topics/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteTopic(int id)
+        /// <summary>
+        /// Delete topic by ID.
+        /// </summary>
+        /// <param name="topic_id"></param>
+        /// <returns></returns>
+        [HttpDelete("/topic/{topic_id}")]
+        public async Task<IActionResult> DeleteTopic(int topic_id)
         {
-            var topic = await _context.Topics.FindAsync(id);
+            var topic = await _context.Topics.FindAsync(topic_id);
             if (topic == null)
             {
                 return NotFound();
@@ -100,15 +118,18 @@ namespace TeamAlumniNETBackend.Controller
             return NoContent();
         }
 
-        [HttpPost("{id}/join")] // POST: /topic/:topic_id/join
-        public async Task<IActionResult> AddUserToTopic(int id)
+        /// <summary>
+        /// Add a user to topic.
+        /// </summary>
+        /// <param name="topic_id"></param>
+        /// <param name="user_id"></param>
+        /// <returns></returns>
+        [HttpPost("/topic/{topic_id}/join")]
+        public async Task<IActionResult> AddUserToTopic(int topic_id, [FromHeader] Guid user_id)
         {
-            // TODO MUST CHANGE TO USER REQUESTING
-            int user_id = 1;
-
             // Get User and Topic
             var user = await _context.Users.FindAsync(user_id);
-            var topic = await _context.Topics.FindAsync(id);
+            var topic = await _context.Topics.FindAsync(topic_id);
 
             // Handle Not Found
             if (topic == null || user == null)
@@ -125,9 +146,14 @@ namespace TeamAlumniNETBackend.Controller
             return NoContent();
         }
 
-        private bool TopicExists(int id)
+        /// <summary>
+        /// Check if topic exists.
+        /// </summary>
+        /// <param name="topic_id"></param>
+        /// <returns></returns>
+        private bool TopicExists(int topic_id)
         {
-            return _context.Topics.Any(e => e.TopicId == id);
+            return _context.Topics.Any(e => e.TopicId == topic_id);
         }
     }
 }

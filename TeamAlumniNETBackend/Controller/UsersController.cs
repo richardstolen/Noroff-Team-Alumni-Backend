@@ -74,7 +74,7 @@ namespace TeamAlumniNETBackend.Controller
         /// <summary>
         /// Update specific properties on User object
         /// </summary>
-        /// <param name="id"></param>
+        /// <param name="user_id"></param>
         /// <param name="user"></param>
         /// <returns></returns>
         [HttpPatch("/user/{user_id}")]
