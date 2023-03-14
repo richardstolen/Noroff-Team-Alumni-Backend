@@ -121,12 +121,12 @@ namespace TeamAlumniNETBackend.Controller
 
 
         [HttpPost("/group/{group_id}/join")]
-        public async Task<IActionResult> AddUserToGroup(int group_id, [FromBody] int user_id, [FromHeader] int admin_id)
+        public async Task<IActionResult> AddUserToGroup(int group_id, [FromForm] Guid user_id, [FromHeader] Guid admin_id)
         {
             Debug.WriteLine("Group id: " + group_id);
             Debug.WriteLine("User id: " + user_id);
             Debug.WriteLine("Admin id: " + admin_id);
-            //int user_id = 1;
+
 
             //Get user and Group
             var user = await _context.Users.FindAsync(user_id);
