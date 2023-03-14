@@ -40,14 +40,14 @@ namespace TeamAlumniNETBackend.Controller
         [HttpGet("/group/{group_id}")]
         public async Task<ActionResult<Group>> GetGroup(int group_id)
         {
-            var @group = await _context.Groups.FindAsync(group_id);
+            var group = await _context.Groups.FindAsync(group_id);
 
-            if (@group == null)
+            if (group == null)
             {
                 return NotFound();
             }
 
-            return @group;
+            return group;
         }
 
         /// <summary>
