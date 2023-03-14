@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using AutoMapper.Execution;
@@ -189,40 +190,49 @@ namespace TeamAlumniNETBackend.Controller
         /// <param name="id"></param>
         /// <param name="post"></param>
         /// <returns></returns>
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutPost(int id, Post post)
+        [HttpPatch("{post_id}")]
+        public async Task<IActionResult> PatchPost(int post_id, Post post, [FromHeader] Guid user_id)
         {
-            if (id != post.PostId)
+            if (post.TargetGroup != null || post.TargetPost != null || post.TargetUser != null || post.TargetEvent != null || post.TargetTopic != null )
             {
-                return BadRequest();
+                return Forbid();
             }
 
-            _context.Entry(post).State = EntityState.Modified;
+            // Find existing entity
+            var existingEntity = await _context.Posts.FindAsync(post_id);
 
-            try
+
+            // Handle not found
+            if (existingEntity == null)
             {
-                await _context.SaveChangesAsync();
+                return NotFound();
             }
-            catch (DbUpdateConcurrencyException)
+
+            if (existingEntity.UserId != user_id)
             {
-                if (!PostExists(id))
+                return Forbid();
+            }
+
+            // Iterate through all of the properties of the update object
+            foreach (PropertyInfo prop in post.GetType().GetProperties())
+            {
+                // Check if the property has been set in the updateObject
+                if (prop.GetValue(post) != null)
                 {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
+                    // If it has been set update the existing entity value
+                    existingEntity.GetType().GetProperty(prop.Name)?.SetValue(existingEntity, prop.GetValue(post));
                 }
             }
+            DateTime now = DateTime.Now;
+            existingEntity.LastUpdate = now;
 
+            // Save to DB
+            await _context.SaveChangesAsync();
             return NoContent();
+         
         }
 
-        /// <summary>
-        /// Create a new Post.
-        /// </summary>
-        /// <param name="post"></param>
-        /// <returns></returns>
+
         [HttpPost]
         public async Task<ActionResult<Post>> PostPost(Post post, [FromHeader] Guid user_id)
         {
