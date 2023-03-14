@@ -139,6 +139,11 @@ namespace TeamAlumniNETBackend.Controller
             return NoContent();
         }
 
+        /// <summary>
+        /// Check if user exists.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns>A bool</returns>
         private bool UserExists(Guid id)
         {
             return _context.Users.Any(e => e.UserId == id);

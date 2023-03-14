@@ -11,7 +11,7 @@ using TeamAlumniNETBackend.Models;
 
 namespace TeamAlumniNETBackend.Controller
 {
-    [Route("api/[controller]")]
+    [Route("")]
     [ApiController]
     public class GroupsController : ControllerBase
     {
@@ -26,7 +26,7 @@ namespace TeamAlumniNETBackend.Controller
         /// methode to get all groups 
         /// </summary>
         /// <returns>List of groups</returns>
-        [HttpGet]
+        [HttpGet("/groups")]
         public async Task<ActionResult<IEnumerable<Group>>> GetGroups()
         {
             return await _context.Groups.ToListAsync();
@@ -37,10 +37,10 @@ namespace TeamAlumniNETBackend.Controller
         /// </summary>
         /// <param name="id"></param>
         /// <returns>The choosen group</returns>
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Group>> GetGroup(int id)
+        [HttpGet("/group/{group_id}")]
+        public async Task<ActionResult<Group>> GetGroup(int group_id)
         {
-            var @group = await _context.Groups.FindAsync(id);
+            var @group = await _context.Groups.FindAsync(group_id);
 
             if (@group == null)
             {
@@ -56,10 +56,10 @@ namespace TeamAlumniNETBackend.Controller
         /// <param name="id"></param>
         /// <param name="group"></param>
         /// <returns>Updated group</returns>
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutGroup(int id, Group @group)
+        [HttpPut("/group/{group_id}")]
+        public async Task<IActionResult> PutGroup(int group_id, Group @group)
         {
-            if (id != @group.GroupId)
+            if (group_id != @group.GroupId)
             {
                 return BadRequest();
             }
@@ -72,7 +72,7 @@ namespace TeamAlumniNETBackend.Controller
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!GroupExists(id))
+                if (!GroupExists(group_id))
                 {
                     return NotFound();
                 }
@@ -90,7 +90,7 @@ namespace TeamAlumniNETBackend.Controller
         /// </summary>
         /// <param name="group"></param>
         /// <returns>New group</returns>
-        [HttpPost]
+        [HttpPost("/group")]
         public async Task<ActionResult<Group>> PostGroup(Group @group)
         {
             _context.Groups.Add(@group);
@@ -104,24 +104,24 @@ namespace TeamAlumniNETBackend.Controller
         /// </summary>
         /// <param name="id"></param>
         /// <returns>Deleted group</returns>
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteGroup(int id)
+        [HttpDelete("/group/{group_id}")]
+        public async Task<IActionResult> DeleteGroup(int group_id)
         {
-            var @group = await _context.Groups.FindAsync(id);
-            if (@group == null)
+            var group = await _context.Groups.FindAsync(group_id);
+            if (group == null)
             {
                 return NotFound();
             }
 
-            _context.Groups.Remove(@group);
+            _context.Groups.Remove(group);
             await _context.SaveChangesAsync();
 
             return NoContent();
         }
 
 
-        [HttpPost("{id}/join")]
-        public async Task<IActionResult> AddUserToGroup(int id, [FromBody] int user_id, [FromHeader] int admin_id)
+        [HttpPost("/group/{group_id}/join")]
+        public async Task<IActionResult> AddUserToGroup(int group_id, [FromBody] int user_id, [FromHeader] int admin_id)
         {
             Debug.WriteLine("Group id: " + id);
             Debug.WriteLine("User id: " + user_id);
@@ -130,7 +130,7 @@ namespace TeamAlumniNETBackend.Controller
 
             //Get user and Group
             var user = await _context.Users.FindAsync(user_id);
-            var group = await _context.Groups.FindAsync(id);
+            var group = await _context.Groups.FindAsync(group_id);
 
             // Handle Not Found
             if (group == null || user == null)
@@ -146,6 +146,11 @@ namespace TeamAlumniNETBackend.Controller
             return NoContent();
         }
 
+        /// <summary>
+        /// Check if group exists in DB.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns>A boolean.</returns>
         private bool GroupExists(int id)
         {
             return _context.Groups.Any(e => e.GroupId == id);
