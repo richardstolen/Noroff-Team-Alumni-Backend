@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -196,8 +197,52 @@ namespace TeamAlumniNETBackend.Controller
         /// <param name="post"></param>
         /// <returns></returns>
         [HttpPost]
-        public async Task<ActionResult<Post>> PostPost(Post post)
+        public async Task<ActionResult<Post>> PostPost(Post post, [FromHeader] Guid user_id)
         {
+            var user = await _context.Users.FindAsync(user_id);
+            var exists = false;
+
+            if (post.TargetEvent != null)
+            {
+                // Check if user is in event
+                var _event = _context.Events.Where(_event => _event.EventId == post.TargetEvent);
+
+                if (_event == null)
+                {
+                    return NotFound();
+                }
+                exists = _event.Any(_event => _event.Users.Contains(user));
+            }
+            if (post.TargetTopic != null)
+            {
+                // Check if user is in topic
+                var topic = _context.Topics.Where(topic => topic.TopicId == post.TargetTopic);
+
+                if (topic == null)
+                {
+                    return NotFound();
+                }
+                exists = topic.Any(topic => topic.Users.Contains(user));
+
+            }
+            if (post.TargetGroup != null)
+            {
+                // Check if user is in group
+                var group = _context.Groups.Where(group => group.GroupId == post.TargetGroup);
+                if (group == null)
+                {
+                    return NotFound();
+                }
+                exists = group.Any(group => group.Users.Contains(user));
+            }
+
+            if (!exists)
+            {
+                return Forbid();
+            }
+
+            DateTime now = DateTime.Now;
+            post.LastUpdate = now;
             _context.Posts.Add(post);
             await _context.SaveChangesAsync();
 
