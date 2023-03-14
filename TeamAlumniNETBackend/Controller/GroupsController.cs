@@ -35,7 +35,7 @@ namespace TeamAlumniNETBackend.Controller
         /// <summary>
         /// Methode to get a spesific group by id
         /// </summary>
-        /// <param name="id"></param>
+        /// <param name="group_id"></param>
         /// <returns>The choosen group</returns>
         [HttpGet("/group/{group_id}")]
         public async Task<ActionResult<Group>> GetGroup(int group_id)
@@ -53,7 +53,7 @@ namespace TeamAlumniNETBackend.Controller
         /// <summary>
         /// Methode to update a spesific group
         /// </summary>
-        /// <param name="id"></param>
+        /// <param name="group_id"></param>
         /// <param name="group"></param>
         /// <returns>Updated group</returns>
         [HttpPut("/group/{group_id}")]
@@ -102,7 +102,7 @@ namespace TeamAlumniNETBackend.Controller
         /// <summary>
         /// Methode to delete a group
         /// </summary>
-        /// <param name="id"></param>
+        /// <param name="group_id"></param>
         /// <returns>Deleted group</returns>
         [HttpDelete("/group/{group_id}")]
         public async Task<IActionResult> DeleteGroup(int group_id)
@@ -123,7 +123,7 @@ namespace TeamAlumniNETBackend.Controller
         [HttpPost("/group/{group_id}/join")]
         public async Task<IActionResult> AddUserToGroup(int group_id, [FromBody] int user_id, [FromHeader] int admin_id)
         {
-            Debug.WriteLine("Group id: " + id);
+            Debug.WriteLine("Group id: " + group_id);
             Debug.WriteLine("User id: " + user_id);
             Debug.WriteLine("Admin id: " + admin_id);
             //int user_id = 1;

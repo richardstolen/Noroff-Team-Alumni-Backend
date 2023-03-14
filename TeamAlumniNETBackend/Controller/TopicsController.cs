@@ -10,7 +10,7 @@ using TeamAlumniNETBackend.Models;
 
 namespace TeamAlumniNETBackend.Controller
 {
-    [Route("api/[controller]")]
+    [Route("")]
     [ApiController]
     public class TopicsController : ControllerBase
     {
