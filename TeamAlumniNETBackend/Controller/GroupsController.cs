@@ -119,14 +119,21 @@ namespace TeamAlumniNETBackend.Controller
             return NoContent();
         }
 
-
+        /// <summary>
+        /// Add User to Group. If private group, needs Admin_id to be equal
+        /// to the user to who created the group.
+        /// </summary>
+        /// <param name="group_id"></param>
+        /// <param name="user_id"></param>
+        /// <param name="admin_id"></param>
+        /// <returns></returns>
         [HttpPost("/group/{group_id}/join")]
         public async Task<IActionResult> AddUserToGroup(int group_id, [FromForm] Guid user_id, [FromHeader] Guid admin_id)
         {
             Debug.WriteLine("Group id: " + group_id);
             Debug.WriteLine("User id: " + user_id);
             Debug.WriteLine("Admin id: " + admin_id);
-
+            // TODO ADD TO PRIVATE GROUP WITH ADMIN USER
 
             //Get user and Group
             var user = await _context.Users.FindAsync(user_id);

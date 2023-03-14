@@ -1,16 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using AutoMapper.Execution;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Hosting;
 using TeamAlumniNETBackend.Data;
 using TeamAlumniNETBackend.Models;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace TeamAlumniNETBackend.Controller
 {
-    [Route("api/[controller]")]
+    [Route("/post")]
     [ApiController]
     public class PostsController : ControllerBase
     {
@@ -22,38 +26,50 @@ namespace TeamAlumniNETBackend.Controller
         }
 
         /// <summary>
-        /// Get all posts to a spesific user 
+        /// Get all Posts related to a user
         /// </summary>
-        /// <param name="id"></param>
+        /// <param name="user_id"></param>
         /// <returns>List of posts</returns>
-        [HttpGet("get/post/user")]
-        public async Task<ActionResult<IEnumerable<Post>>> GetPosts([FromHeader] Guid id)
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<Post>>> GetPosts([FromHeader] Guid user_id)
         {
-            var postList = await _context.Posts.Where(post => post.TargetUser == id).ToListAsync();
+            // TODO: FIX Get posts 
+            // Returns a list of posts to groups and topics for which the requesting user is subscribed.
+            // Optionally accepts appropriate query parameters to search, filter, limit and paginate the
+            // number of objects return in the reponse
+            return NotFound();
+        }
+
+        /// <summary>
+        /// Get all Direct messages to a spesific user 
+        /// </summary>
+        /// <param name="user_id"></param>
+        /// <returns>List of posts</returns>
+        [HttpGet("user")]
+        public async Task<ActionResult<IEnumerable<Post>>> GetDirectMessages([FromHeader] Guid user_id)
+        {
+            var postList = await _context.Posts.Where(post => post.TargetUser == user_id).ToListAsync();
 
             if (postList == null)
             {
                 return NotFound();
             }
-
             return postList;
         }
 
         /// <summary>
-        /// Get all posts between two users 
+        /// Get all Direct Messages between two users 
         /// </summary>
-        /// <param name="userId"></param>
-        /// <param name="targetUser"></param>
+        /// <param name="userId">The user that the current user wants messages from</param>
+        /// <param name="targetUser">Current or logged in user</param>
         /// <returns>List of posts</returns>
 
-        [HttpGet("get/post/user/user_id")]
-
-        public async Task<ActionResult<IEnumerable<Post>>> GetPostsByID(Guid userId , [FromHeader] Guid targetUser)
+        [HttpGet("user/{user_id}")]
+        public async Task<ActionResult<IEnumerable<Post>>> GetPostsByID(Guid userId, [FromHeader] Guid targetUser)
         {
             var directPost = await _context.Posts.Where(Post => Post.TargetUser == targetUser).Where(Post => Post.UserId == userId).ToListAsync();
-          
 
-            if (directPost == null) 
+            if (directPost == null)
             {
                 return NotFound();
             }
@@ -66,16 +82,16 @@ namespace TeamAlumniNETBackend.Controller
         /// <param name="targetGroup"></param>
         /// <returns>List of posts</returns>
 
-        [HttpGet("post/group/group_id")]
-        public async Task<ActionResult<IEnumerable<Post>>> GetPostsByGroup([FromHeader] int targetGroup) 
+        [HttpGet("group/group_id")]
+        public async Task<ActionResult<IEnumerable<Post>>> GetPostsByGroup([FromHeader] int targetGroup)
         {
             var groupPost = await _context.Posts.Where(Post => Post.TargetGroup == targetGroup).ToListAsync();
 
-            if (groupPost == null) 
+            if (groupPost == null)
             {
                 return NotFound();
             }
-            return groupPost;    
+            return groupPost;
         }
 
         /// <summary>
@@ -84,14 +100,14 @@ namespace TeamAlumniNETBackend.Controller
         /// <param name="targetTopic"></param>
         /// <returns>List of posts</returns>
 
-        [HttpGet("Post/Topic/topic_id")]
-        public async Task<ActionResult<IEnumerable<Post>>> GetPostsByTopic([FromHeader] int targetTopic) 
+        [HttpGet("topic/topic_id")]
+        public async Task<ActionResult<IEnumerable<Post>>> GetPostsByTopic([FromHeader] int targetTopic)
         {
             var topicPost = await _context.Posts.Where(Post => Post.TargetTopic == targetTopic).ToListAsync();
 
             if (topicPost == null)
             {
-                return NotFound();                   
+                return NotFound();
             }
             return topicPost;
         }
@@ -102,12 +118,12 @@ namespace TeamAlumniNETBackend.Controller
         /// <param name="targetEvent"></param>
         /// <returns>List of posts</returns>
 
-        [HttpGet("post/event/event_id")]
-        public async Task<ActionResult<IEnumerable<Post>>> GetPostsByEvent([FromHeader] int targetEvent) 
+        [HttpGet("event/event_id")]
+        public async Task<ActionResult<IEnumerable<Post>>> GetPostsByEvent([FromHeader] int targetEvent)
         {
-            var eventPost = await _context.Posts.Where(Post => Post.TargetEvent== targetEvent).ToListAsync();
+            var eventPost = await _context.Posts.Where(Post => Post.TargetEvent == targetEvent).ToListAsync();
 
-            if (eventPost == null) 
+            if (eventPost == null)
             {
                 return NotFound();
             }
@@ -119,7 +135,11 @@ namespace TeamAlumniNETBackend.Controller
 
 
 
-        // GET: api/Posts/5
+        /// <summary>
+        /// Get Post by ID.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpGet("{id}")]
         public async Task<ActionResult<Post>> GetPost(int id)
         {
@@ -135,8 +155,12 @@ namespace TeamAlumniNETBackend.Controller
 
 
 
-        // PUT: api/Posts/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        /// <summary>
+        /// Edit a post.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="post"></param>
+        /// <returns></returns>
         [HttpPut("{id}")]
         public async Task<IActionResult> PutPost(int id, Post post)
         {
@@ -166,8 +190,11 @@ namespace TeamAlumniNETBackend.Controller
             return NoContent();
         }
 
-        // POST: api/Posts
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        /// <summary>
+        /// Create a new Post.
+        /// </summary>
+        /// <param name="post"></param>
+        /// <returns></returns>
         [HttpPost]
         public async Task<ActionResult<Post>> PostPost(Post post)
         {
@@ -177,7 +204,11 @@ namespace TeamAlumniNETBackend.Controller
             return CreatedAtAction("GetPost", new { id = post.PostId }, post);
         }
 
-        // DELETE: api/Posts/5
+        /// <summary>
+        /// Delete a post.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeletePost(int id)
         {
