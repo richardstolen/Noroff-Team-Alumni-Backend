@@ -10,7 +10,7 @@ using TeamAlumniNETBackend.Models;
 
 namespace TeamAlumniNETBackend.Controller
 {
-    [Route("")]
+    [Route("/topic")]
     [ApiController]
     public class TopicsController : ControllerBase
     {
@@ -25,7 +25,7 @@ namespace TeamAlumniNETBackend.Controller
         /// Get all topics.
         /// </summary>
         /// <returns></returns>
-        [HttpGet("/topics")]
+        [HttpGet]
         public async Task<ActionResult<IEnumerable<Topic>>> GetTopics()
         {
             return await _context.Topics.ToListAsync();
@@ -36,7 +36,7 @@ namespace TeamAlumniNETBackend.Controller
         /// </summary>
         /// <param name="topic_id"></param>
         /// <returns></returns>
-        [HttpGet("/topic/{topic_id}")]
+        [HttpGet("{topic_id}")]
         public async Task<ActionResult<Topic>> GetTopic(int topic_id)
         {
             var topic = await _context.Topics.FindAsync(topic_id);
@@ -55,7 +55,7 @@ namespace TeamAlumniNETBackend.Controller
         /// <param name="topic_id"></param>
         /// <param name="topic"></param>
         /// <returns></returns>
-        [HttpPut("/topic/{topic_id}")]
+        [HttpPut("{topic_id}")]
         public async Task<IActionResult> PutTopic(int topic_id, Topic topic)
         {
             if (topic_id != topic.TopicId)
@@ -89,7 +89,7 @@ namespace TeamAlumniNETBackend.Controller
         /// </summary>
         /// <param name="topic"></param>
         /// <returns></returns>
-        [HttpPost("/topic")]
+        [HttpPost]
         public async Task<ActionResult<Topic>> PostTopic(Topic topic)
         {
             _context.Topics.Add(topic);
@@ -103,7 +103,7 @@ namespace TeamAlumniNETBackend.Controller
         /// </summary>
         /// <param name="topic_id"></param>
         /// <returns></returns>
-        [HttpDelete("/topic/{topic_id}")]
+        [HttpDelete("{topic_id}")]
         public async Task<IActionResult> DeleteTopic(int topic_id)
         {
             var topic = await _context.Topics.FindAsync(topic_id);
@@ -124,7 +124,7 @@ namespace TeamAlumniNETBackend.Controller
         /// <param name="topic_id"></param>
         /// <param name="user_id"></param>
         /// <returns></returns>
-        [HttpPost("/topic/{topic_id}/join")]
+        [HttpPost("{topic_id}/join")]
         public async Task<IActionResult> AddUserToTopic(int topic_id, [FromHeader] Guid user_id)
         {
             // Get User and Topic
