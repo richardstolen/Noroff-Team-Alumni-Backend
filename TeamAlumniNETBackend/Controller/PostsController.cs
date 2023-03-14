@@ -21,8 +21,11 @@ namespace TeamAlumniNETBackend.Controller
             _context = context;
         }
 
-
-        // Get/post/user
+        /// <summary>
+        /// Methode to get all posts to a spesific user 
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns>List of posts</returns>
         [HttpGet("get/post/user")]
         public async Task<ActionResult<IEnumerable<Post>>> GetPosts([FromHeader] Guid id)
         {
@@ -36,7 +39,12 @@ namespace TeamAlumniNETBackend.Controller
             return postList;
         }
 
-        // Get/post/user/user_id
+        /// <summary>
+        /// methode to get all posts between two users 
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="targetUser"></param>
+        /// <returns>List of posts</returns>
 
         [HttpGet("get/post/user/user_id")]
 
@@ -52,7 +60,11 @@ namespace TeamAlumniNETBackend.Controller
             return directPost;
         }
 
-        // Get /post/group/:grouo_id
+        /// <summary>
+        /// methode to get all posts in a spesific group
+        /// </summary>
+        /// <param name="targetGroup"></param>
+        /// <returns>List of posts</returns>
 
         [HttpGet("post/group/group_id")]
         public async Task<ActionResult<IEnumerable<Post>>> GetPostsByGroup([FromHeader] int targetGroup) 
@@ -66,7 +78,11 @@ namespace TeamAlumniNETBackend.Controller
             return groupPost;    
         }
 
-        // Get /post/topic/:topic_id
+        /// <summary>
+        /// Methode to get all posts in a spesific Topic
+        /// </summary>
+        /// <param name="targetTopic"></param>
+        /// <returns>List of posts</returns>
 
         [HttpGet("Post/Topic/topic_id")]
         public async Task<ActionResult<IEnumerable<Post>>> GetPostsByTopic([FromHeader] int targetTopic) 
@@ -79,6 +95,25 @@ namespace TeamAlumniNETBackend.Controller
             }
             return topicPost;
         }
+
+        /// <summary>
+        /// Methode to get all posts to a spesific event
+        /// </summary>
+        /// <param name="targetEvent"></param>
+        /// <returns>List of posts</returns>
+
+        [HttpGet("post/event/event_id")]
+        public async Task<ActionResult<IEnumerable<Post>>> GetPostsByEvent([FromHeader] int targetEvent) 
+        {
+            var eventPost = await _context.Posts.Where(Post => Post.TargetEvent== targetEvent).ToListAsync();
+
+            if (eventPost == null) 
+            {
+                return NotFound();
+            }
+            return eventPost;
+        }
+
 
 
 

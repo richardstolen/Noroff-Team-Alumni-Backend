@@ -22,14 +22,21 @@ namespace TeamAlumniNETBackend.Controller
             _context = context;
         }
 
-        // GET: api/Groups
+        /// <summary>
+        /// methode to get all groups 
+        /// </summary>
+        /// <returns>List of groups</returns>
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Group>>> GetGroups()
         {
             return await _context.Groups.ToListAsync();
         }
 
-        // GET: api/Groups/5
+        /// <summary>
+        /// Methode to get a spesific group by id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns>The choosen group</returns>
         [HttpGet("{id}")]
         public async Task<ActionResult<Group>> GetGroup(int id)
         {
@@ -43,8 +50,12 @@ namespace TeamAlumniNETBackend.Controller
             return @group;
         }
 
-        // PUT: api/Groups/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        /// <summary>
+        /// Methode to update a spesific group
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="group"></param>
+        /// <returns>Updated group</returns>
         [HttpPut("{id}")]
         public async Task<IActionResult> PutGroup(int id, Group @group)
         {
@@ -74,8 +85,11 @@ namespace TeamAlumniNETBackend.Controller
             return NoContent();
         }
 
-        // POST: api/Groups
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        /// <summary>
+        /// Methode to create new groups
+        /// </summary>
+        /// <param name="group"></param>
+        /// <returns>New group</returns>
         [HttpPost]
         public async Task<ActionResult<Group>> PostGroup(Group @group)
         {
@@ -85,7 +99,11 @@ namespace TeamAlumniNETBackend.Controller
             return CreatedAtAction("GetGroup", new { id = @group.GroupId }, @group);
         }
 
-        // DELETE: api/Groups/5
+        /// <summary>
+        /// Methode to delete a group
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns>Deleted group</returns>
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteGroup(int id)
         {
