@@ -12,5 +12,10 @@ namespace TeamAlumniNETBackend.Models
         public bool? IsPrivate { get; set; }
         public ICollection<Event>? Events { get; set; } = new List<Event>();
         public ICollection<User>? Users { get; set; } = new List<User>();
+
+        public override string? ToString()
+        {
+            return $"Groupid: {GroupId}, Name: {Name}";
+        }
     }
 }

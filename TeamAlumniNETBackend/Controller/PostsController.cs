@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using AutoMapper.Execution;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -12,6 +13,7 @@ using Microsoft.Extensions.Hosting;
 using TeamAlumniNETBackend.Data;
 using TeamAlumniNETBackend.Models;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
+using Group = TeamAlumniNETBackend.Models.Group;
 
 namespace TeamAlumniNETBackend.Controller
 {
@@ -27,18 +29,54 @@ namespace TeamAlumniNETBackend.Controller
         }
 
         /// <summary>
-        /// Get all Posts related to a user
+        /// Get all Posts related to a user. This means all posts from groups, topics and events 
+        /// that the user is subscribed to.
         /// </summary>
         /// <param name="user_id"></param>
         /// <returns>List of posts</returns>
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Post>>> GetPosts([FromHeader] Guid user_id)
         {
-            // TODO: FIX Get posts 
-            // Returns a list of posts to groups and topics for which the requesting user is subscribed.
-            // Optionally accepts appropriate query parameters to search, filter, limit and paginate the
-            // number of objects return in the reponse
-            return NotFound();
+            // Get the User
+            var user = await _context.Users.FindAsync(user_id);
+
+            // Get Groups, topics and events that the user is subscribed to
+            var groups = await _context.Groups.Where(g => g.Users.Contains(user)).ToListAsync();
+            var topics = await _context.Topics.Where(t => t.Users.Contains(user)).ToListAsync();
+            var events = await _context.Events.Where(e => e.Users.Contains(user)).ToListAsync();
+
+            var postList = new List<Post>();
+
+            /*
+             *  Looping through all groups, topics and events and getting all posts from them.
+             */
+            foreach (var group in groups)
+            {
+                var groupPosts = await _context.Posts.Where(p => p.TargetGroup == group.GroupId).ToListAsync();
+                postList.AddRange(groupPosts);
+            }
+
+            foreach (var topic in topics)
+            {
+                var topicPosts = await _context.Posts.Where(p => p.TargetTopic == topic.TopicId).ToListAsync();
+                postList.AddRange(topicPosts);
+            }
+
+            foreach (var @event in events)
+            {
+                var eventPosts = await _context.Posts.Where(e => e.TargetEvent == @event.EventId).ToListAsync();
+                postList.AddRange(eventPosts);
+            }
+
+            if (postList == null)
+            {
+                return NotFound();
+            }
+
+            // Sorting the list, with last updated post first
+            postList.Sort((x, y) => DateTime.Compare(y.LastUpdate, x.LastUpdate));
+
+            return postList;
         }
 
         /// <summary>
@@ -64,7 +102,6 @@ namespace TeamAlumniNETBackend.Controller
         /// <param name="userId">The user that the current user wants messages from</param>
         /// <param name="targetUser">Current or logged in user</param>
         /// <returns>List of posts</returns>
-
         [HttpGet("user/{user_id}")]
         public async Task<ActionResult<IEnumerable<Post>>> GetPostsByID(Guid userId, [FromHeader] Guid targetUser)
         {
@@ -82,7 +119,6 @@ namespace TeamAlumniNETBackend.Controller
         /// </summary>
         /// <param name="targetGroup"></param>
         /// <returns>List of posts</returns>
-
         [HttpGet("group/group_id")]
         public async Task<ActionResult<IEnumerable<Post>>> GetPostsByGroup([FromHeader] int targetGroup)
         {
@@ -100,7 +136,6 @@ namespace TeamAlumniNETBackend.Controller
         /// </summary>
         /// <param name="targetTopic"></param>
         /// <returns>List of posts</returns>
-
         [HttpGet("topic/topic_id")]
         public async Task<ActionResult<IEnumerable<Post>>> GetPostsByTopic([FromHeader] int targetTopic)
         {
@@ -118,7 +153,6 @@ namespace TeamAlumniNETBackend.Controller
         /// </summary>
         /// <param name="targetEvent"></param>
         /// <returns>List of posts</returns>
-
         [HttpGet("event/event_id")]
         public async Task<ActionResult<IEnumerable<Post>>> GetPostsByEvent([FromHeader] int targetEvent)
         {
@@ -130,11 +164,6 @@ namespace TeamAlumniNETBackend.Controller
             }
             return eventPost;
         }
-
-
-
-
-
 
         /// <summary>
         /// Get Post by ID.
@@ -153,8 +182,6 @@ namespace TeamAlumniNETBackend.Controller
 
             return post;
         }
-
-
 
         /// <summary>
         /// Edit a post.
@@ -269,6 +296,11 @@ namespace TeamAlumniNETBackend.Controller
             return NoContent();
         }
 
+        /// <summary>
+        /// Check if post exists.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         private bool PostExists(int id)
         {
             return _context.Posts.Any(e => e.PostId == id);

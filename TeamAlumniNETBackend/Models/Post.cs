@@ -17,5 +17,10 @@ namespace TeamAlumniNETBackend.Models
         public int? TargetGroup { get; set; }
         public int? TargetTopic { get; set; }
         public int? TargetEvent { get; set; }
+
+        public override string? ToString()
+        {
+            return $"Postid: {PostId}, Title: {Title}";
+        }
     }
 }
