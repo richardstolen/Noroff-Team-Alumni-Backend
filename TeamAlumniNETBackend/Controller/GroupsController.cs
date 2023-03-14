@@ -23,7 +23,7 @@ namespace TeamAlumniNETBackend.Controller
         }
 
         /// <summary>
-        /// methode to get all groups 
+        /// Get all groups 
         /// </summary>
         /// <returns>List of groups</returns>
         [HttpGet]
@@ -33,7 +33,7 @@ namespace TeamAlumniNETBackend.Controller
         }
 
         /// <summary>
-        /// Methode to get a spesific group by id
+        /// Get a spesific group by id
         /// </summary>
         /// <param name="id"></param>
         /// <returns>The choosen group</returns>
@@ -51,7 +51,7 @@ namespace TeamAlumniNETBackend.Controller
         }
 
         /// <summary>
-        /// Methode to update a spesific group
+        /// Update a spesific group
         /// </summary>
         /// <param name="id"></param>
         /// <param name="group"></param>
@@ -86,7 +86,7 @@ namespace TeamAlumniNETBackend.Controller
         }
 
         /// <summary>
-        /// Methode to create new groups
+        /// Create new groups
         /// </summary>
         /// <param name="group"></param>
         /// <returns>New group</returns>
@@ -100,7 +100,7 @@ namespace TeamAlumniNETBackend.Controller
         }
 
         /// <summary>
-        /// Methode to delete a group
+        /// Delete a group
         /// </summary>
         /// <param name="id"></param>
         /// <returns>Deleted group</returns>
