@@ -22,7 +22,7 @@ namespace TeamAlumniNETBackend.Controller
         }
 
         /// <summary>
-        /// Methode to get all posts to a spesific user 
+        /// Get all posts to a spesific user 
         /// </summary>
         /// <param name="id"></param>
         /// <returns>List of posts</returns>
@@ -40,7 +40,7 @@ namespace TeamAlumniNETBackend.Controller
         }
 
         /// <summary>
-        /// methode to get all posts between two users 
+        /// Get all posts between two users 
         /// </summary>
         /// <param name="userId"></param>
         /// <param name="targetUser"></param>
@@ -61,7 +61,7 @@ namespace TeamAlumniNETBackend.Controller
         }
 
         /// <summary>
-        /// methode to get all posts in a spesific group
+        /// Get all posts in a spesific group
         /// </summary>
         /// <param name="targetGroup"></param>
         /// <returns>List of posts</returns>
@@ -79,7 +79,7 @@ namespace TeamAlumniNETBackend.Controller
         }
 
         /// <summary>
-        /// Methode to get all posts in a spesific Topic
+        /// Get all posts in a spesific Topic
         /// </summary>
         /// <param name="targetTopic"></param>
         /// <returns>List of posts</returns>
@@ -97,7 +97,7 @@ namespace TeamAlumniNETBackend.Controller
         }
 
         /// <summary>
-        /// Methode to get all posts to a spesific event
+        /// Get all posts to a spesific event
         /// </summary>
         /// <param name="targetEvent"></param>
         /// <returns>List of posts</returns>
