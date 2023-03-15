@@ -119,11 +119,15 @@ namespace TeamAlumniNETBackend.Controller
             Debug.WriteLine($"type: {type}");
 
             var user = await _context.Users.FindAsync(user_id);
-            var exists = false;
 
             if (type == "topic")
             {
                 var topic = await _context.Topics.FindAsync(id);
+
+                if (topic == null)
+                {
+                    return NotFound();
+                }
                 _event.Topics.Add(topic);
             }
 
