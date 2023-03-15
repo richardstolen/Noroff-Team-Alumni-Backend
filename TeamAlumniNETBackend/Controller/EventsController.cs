@@ -113,54 +113,54 @@ namespace TeamAlumniNETBackend.Controller
         }
 
         [HttpPost("event")]
-        public async Task<ActionResult<Event>> PostEvent(Event _event, [FromHeader] Guid user_id, [FromHeader] string type)
+        public async Task<ActionResult<Event>> PostEvent(Event _event, [FromHeader] Guid user_id, [FromHeader] string type, [FromHeader] int id)
         {
             Debug.WriteLine($"user: {user_id}");
+            Debug.WriteLine($"type: {type}");
 
             var user = await _context.Users.FindAsync(user_id);
-            var topicType = await _context.Topics.FindAsync(type);
             var exists = false;
-            
 
-            if (topicType != null) 
+            if (type == "topic")
             {
-                var topic = _context.Topics.Where(topic => topic.Events == _event.Topics);
+                var topic = await _context.Topics.FindAsync(id);
+                _event.Topics.Add(topic);
             }
 
 
 
-            if (_event.Topics != null)
-            {
-                // Check if user is in topic
-                var topic = _context.Topics.Where(topic => topic.Events == _event.Topics);
+            //if (_event.Topics != null)
+            //{
+            //    // Check if user is in topic
+            //    var topic = _context.Topics.Where(topic => topic.Events == _event.Topics);
 
-                if (topic == null)
-                {
-                    return NotFound();
-                }
-                exists = topic.Any(topic => topic.Users.Contains(user));
+            //    if (topic == null)
+            //    {
+            //        return NotFound();
+            //    }
+            //    exists = topic.Any(topic => topic.Users.Contains(user));
 
-            }
-            if (_event.Groups != null)
-            {
-                // Check if user is in group
-                var group = _context.Groups.Where(group => group.Events == _event.Groups);
-                if (group == null)
-                {
-                    return NotFound();
-                }
-                exists = group.Any(group => group.Users.Contains(user));
-            }
+            //}
+            //if (_event.Groups != null)
+            //{
+            //    // Check if user is in group
+            //    var group = _context.Groups.Where(group => group.Events == _event.Groups);
+            //    if (group == null)
+            //    {
+            //        return NotFound();
+            //    }
+            //    exists = group.Any(group => group.Users.Contains(user));
+            //}
 
-            if (!exists)
-            {
-                return Forbid();
-            }
+            //if (!exists)
+            //{
+            //    return Forbid();
+            //}
 
             //DateTime now = DateTime.Now;
             //_event.LastUpdate = now;
-            //_context.Events.Add(_event);
-            //await _context.SaveChangesAsync();
+            _context.Events.Add(_event);
+            await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetEvent", new { id = _event.EventId }, _event);
         }
