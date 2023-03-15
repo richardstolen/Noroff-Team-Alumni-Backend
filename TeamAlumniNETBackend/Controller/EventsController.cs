@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
@@ -21,11 +23,16 @@ namespace TeamAlumniNETBackend.Controller
             _context = context;
         }
 
-        // GET: api/Events
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<Event>>> GetEvents()
+        [HttpGet("/event")]
+        public async Task<ActionResult<IEnumerable<Event>>> GetEvents([FromHeader] Guid user_id)
         {
-            return await _context.Events.ToListAsync();
+            var eventList = await _context.Events.Where(Event => Event.UserId == user_id).ToListAsync();
+
+            if (eventList == null)
+            {
+                return NotFound();
+            }
+            return (eventList);
         }
 
         // GET: api/Events/5
@@ -104,5 +111,59 @@ namespace TeamAlumniNETBackend.Controller
         {
             return _context.Events.Any(e => e.EventId == id);
         }
+
+        [HttpPost("event")]
+        public async Task<ActionResult<Event>> PostEvent(Event _event, [FromHeader] Guid user_id, [FromHeader] string type)
+        {
+            Debug.WriteLine($"user: {user_id}");
+
+            var user = await _context.Users.FindAsync(user_id);
+            var topicType = await _context.Topics.FindAsync(type);
+            var exists = false;
+            
+
+            if (topicType != null) 
+            {
+                var topic = _context.Topics.Where(topic => topic.Events == _event.Topics);
+            }
+
+
+
+            if (_event.Topics != null)
+            {
+                // Check if user is in topic
+                var topic = _context.Topics.Where(topic => topic.Events == _event.Topics);
+
+                if (topic == null)
+                {
+                    return NotFound();
+                }
+                exists = topic.Any(topic => topic.Users.Contains(user));
+
+            }
+            if (_event.Groups != null)
+            {
+                // Check if user is in group
+                var group = _context.Groups.Where(group => group.Events == _event.Groups);
+                if (group == null)
+                {
+                    return NotFound();
+                }
+                exists = group.Any(group => group.Users.Contains(user));
+            }
+
+            if (!exists)
+            {
+                return Forbid();
+            }
+
+            //DateTime now = DateTime.Now;
+            //_event.LastUpdate = now;
+            //_context.Events.Add(_event);
+            //await _context.SaveChangesAsync();
+
+            return CreatedAtAction("GetEvent", new { id = _event.EventId }, _event);
+        }
+
     }
 }
