@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using TeamAlumniNETBackend.Data;
 using TeamAlumniNETBackend.Models;
 
@@ -51,16 +53,19 @@ namespace TeamAlumniNETBackend.Controller
 
         // PUT: api/Events/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutEvent(int id, Event @event)
+        [HttpPatch("{id}")]
+        public async Task<IActionResult> PatchEvent(int id, Event @event, [FromHeader] Guid user_id)
         {
+            if (user_id != @event.UserId)
+            {
+                return Forbid();
+            }
+
             if (id != @event.EventId)
             {
                 return BadRequest();
             }
-
             _context.Entry(@event).State = EntityState.Modified;
-
             try
             {
                 await _context.SaveChangesAsync();
@@ -112,11 +117,209 @@ namespace TeamAlumniNETBackend.Controller
             return _context.Events.Any(e => e.EventId == id);
         }
 
+        [HttpDelete("event/event_id/invite/group/group_id")]
+        public async Task<IActionResult> DeleteEventGroup(Event _event,[FromHeader] int id, [FromHeader] Guid user_id, [FromHeader] string type)
+        {
+            var user = await _context.Users.FindAsync(user_id);
+
+            if (user_id != _event.UserId)
+            {
+                return Forbid();
+            }
+
+            if (type != "group")
+            {
+                return Forbid();
+            }
+
+            if (type == "group")
+            {
+                var group = await _context.Groups.FindAsync(id);
+
+            }  
+
+            if (_event == null)
+            {
+                return NotFound();
+            }
+
+            _context.Events.Remove(_event);
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
+
+
+        [HttpDelete("event/event_id/invite/topic/topic_id")]
+        public async Task<IActionResult> DeleteEventTopic(Event _event, [FromHeader] int id, [FromHeader] Guid user_id, [FromHeader] string type)
+        {
+            var user = await _context.Users.FindAsync(user_id);
+
+            if (user_id != _event.UserId)
+            {
+                return Forbid();
+            }
+
+            if (type != "topic")
+            {
+                return Forbid();
+            }
+
+            if (type == "topic")
+            {
+                var topic = await _context.Topics.FindAsync(id);
+
+            }
+
+            if (_event == null)
+            {
+                return NotFound();
+            }
+
+            _context.Events.Remove(_event);
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
+
+
+        [HttpDelete("event/event_id/invite/user/user_id")]
+        public async Task<IActionResult> DeleteEventUser(Event _event, [FromHeader] int id, [FromHeader] Guid user_id, [FromHeader] string type)
+        {
+            var user = await _context.Users.FindAsync(user_id);
+
+            if (user_id != _event.UserId)
+            {
+                return Forbid();
+            }
+
+            if (type != "user")
+            {
+                return Forbid();
+            }
+
+            if (type == "user")
+            {
+                var _user = await _context.Users.FindAsync(id);
+
+            }
+
+            if (_event == null)
+            {
+                return NotFound();
+            }
+
+            _context.Events.Remove(_event);
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
+
+
+
+
+        [HttpPost("event/event_id/invite/group/group_id")]
+
+        public async Task <ActionResult<Event>> PostEventGroup(Event _event, [FromHeader] Guid user_id, [FromHeader] string type, [FromHeader] int id) 
+        {
+            var user = await _context.Users.FindAsync(user_id);
+
+            if (user_id != _event.UserId)
+            {
+                return Forbid();
+            }
+
+            if (type == "group")
+            {
+                var group = await _context.Groups.FindAsync(id);
+
+                if (group == null)
+                {
+                    return NotFound();
+                }
+                _event.Groups.Add(group);
+            }
+
+            if (type!= "group") 
+            {
+                return Forbid();
+            }
+
+                _context.Events.Add(_event);
+                await _context.SaveChangesAsync();
+
+                return CreatedAtAction("GetEvent", new { id = _event.EventId }, _event);
+            }
+
+        [HttpPost("event/event_id/invite/topic/topic_id")]
+
+        public async Task<ActionResult<Event>> PostEventTopic(Event _event, [FromHeader] Guid user_id, [FromHeader] string type, [FromHeader] int id)
+        {
+            var user = await _context.Users.FindAsync(user_id);
+
+            if (user_id != _event.UserId)
+            {
+                return Forbid();
+            }
+
+            if (type == "topic")
+            {
+                var topic = await _context.Topics.FindAsync(id);
+
+                if (topic == null)
+                {
+                    return NotFound();
+                }
+                _event.Topics.Add(topic);
+            }
+
+            if (type != "topic")
+            {
+                return Forbid();
+            }
+
+            _context.Events.Add(_event);
+            await _context.SaveChangesAsync();
+
+            return CreatedAtAction("GetEvent", new { id = _event.EventId }, _event);
+        }
+
+        [HttpPost("event/event_id/invite/user/user_id")]
+
+        public async Task<ActionResult<Event>> PostEventUser(Event _event, [FromHeader] Guid user_id, [FromHeader] string type, [FromHeader] int id)
+        {
+            var user = await _context.Users.FindAsync(user_id);
+
+            if (user_id != _event.UserId)
+            {
+                return Forbid();
+            }
+
+            if (type == "user")
+            {
+                var _user = await _context.Users.FindAsync(id);
+
+                if (_user == null)
+                {
+                    return NotFound();
+                }
+                _event.Users.Add(_user);
+            }
+
+            if (type != "user")
+            {
+                return Forbid();
+            }
+
+            _context.Events.Add(_event);
+            await _context.SaveChangesAsync();
+
+            return CreatedAtAction("GetEvent", new { id = _event.EventId }, _event);
+        }
+
         [HttpPost("event")]
         public async Task<ActionResult<Event>> PostEvent(Event _event, [FromHeader] Guid user_id, [FromHeader] string type, [FromHeader] int id)
         {
-            Debug.WriteLine($"user: {user_id}");
-            Debug.WriteLine($"type: {type}");
 
             var user = await _context.Users.FindAsync(user_id);
 
@@ -131,35 +334,38 @@ namespace TeamAlumniNETBackend.Controller
                 _event.Topics.Add(topic);
             }
 
+            if (type == "group")
+            {
+                var group = await _context.Groups.FindAsync(id);
 
+                if (group == null)
+                {
+                    return NotFound();
+                }
+                _event.Groups.Add(group);
+            }
 
-            //if (_event.Topics != null)
-            //{
-            //    // Check if user is in topic
-            //    var topic = _context.Topics.Where(topic => topic.Events == _event.Topics);
+            if (type == "rsvp")
+            {
+                var rsvp = await _context.Rsvps.FindAsync(id);
 
-            //    if (topic == null)
-            //    {
-            //        return NotFound();
-            //    }
-            //    exists = topic.Any(topic => topic.Users.Contains(user));
+                if (rsvp == null)
+                {
+                    return NotFound();
+                }
+                _event.Rsvps.Add(rsvp);
+            }
 
-            //}
-            //if (_event.Groups != null)
-            //{
-            //    // Check if user is in group
-            //    var group = _context.Groups.Where(group => group.Events == _event.Groups);
-            //    if (group == null)
-            //    {
-            //        return NotFound();
-            //    }
-            //    exists = group.Any(group => group.Users.Contains(user));
-            //}
+            if (type == "user")
+            {
+                var _user = await _context.Users.FindAsync(id);
 
-            //if (!exists)
-            //{
-            //    return Forbid();
-            //}
+                if (_user == null)
+                {
+                    return NotFound();
+                }
+                _event.Users.Add(_user);
+            }
 
             //DateTime now = DateTime.Now;
             //_event.LastUpdate = now;
@@ -168,6 +374,9 @@ namespace TeamAlumniNETBackend.Controller
 
             return CreatedAtAction("GetEvent", new { id = _event.EventId }, _event);
         }
-
     }
 }
+    
+    
+    
+
