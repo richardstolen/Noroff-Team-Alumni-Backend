@@ -20,6 +20,7 @@ using Group = TeamAlumniNETBackend.Models.Group;
 
 namespace TeamAlumniNETBackend.Controller
 {
+    [Authorize]
     [Route("/post")]
     [ApiController]
     public class PostsController : ControllerBase

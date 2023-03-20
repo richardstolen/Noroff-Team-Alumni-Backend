@@ -9,6 +9,7 @@ namespace TeamAlumniNETBackend.Models
         public int EventId { get; set; }
         public Guid? UserId { get; set; }
         public string? Description { get; set; }
+        public DateTime Date { get; set; }
         public ICollection<Rsvp>? Rsvps { get; set; } = new List<Rsvp>();
         public ICollection<Topic>? Topics { get; set; } = new List<Topic>();
         public ICollection<Group>? Groups { get; set; } = new List<Group>();

@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using TeamAlumniNETBackend.Models;
 
 namespace TeamAlumniNETBackend.Data

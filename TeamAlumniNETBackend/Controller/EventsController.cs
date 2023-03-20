@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -14,6 +15,7 @@ using TeamAlumniNETBackend.Models;
 
 namespace TeamAlumniNETBackend.Controller
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class EventsController : ControllerBase
@@ -118,7 +120,7 @@ namespace TeamAlumniNETBackend.Controller
         }
 
         [HttpDelete("event/event_id/invite/group/group_id")]
-        public async Task<IActionResult> DeleteEventGroup(Event _event,[FromHeader] int id, [FromHeader] Guid user_id, [FromHeader] string type)
+        public async Task<IActionResult> DeleteEventGroup(Event _event, [FromHeader] int id, [FromHeader] Guid user_id, [FromHeader] string type)
         {
             var user = await _context.Users.FindAsync(user_id);
 
@@ -136,7 +138,7 @@ namespace TeamAlumniNETBackend.Controller
             {
                 var group = await _context.Groups.FindAsync(id);
 
-            }  
+            }
 
             if (_event == null)
             {
@@ -364,7 +366,7 @@ namespace TeamAlumniNETBackend.Controller
                 return Forbid();
             }
 
-            
+
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetEvent", new { id = _event.EventId }, _event);
@@ -404,7 +406,7 @@ namespace TeamAlumniNETBackend.Controller
             return CreatedAtAction("GetEvent", new { id = _event.EventId }, _event);
         }
 
-        
+
 
         [HttpPost("event")]
         public async Task<ActionResult<Event>> PostEvent(Event _event, [FromHeader] Guid user_id, [FromHeader] string type, [FromHeader] int id)
@@ -465,7 +467,7 @@ namespace TeamAlumniNETBackend.Controller
         }
     }
 }
-    
-    
-    
+
+
+
 

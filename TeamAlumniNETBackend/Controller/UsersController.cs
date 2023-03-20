@@ -9,10 +9,12 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TeamAlumniNETBackend.Data;
+using TeamAlumniNETBackend.DTOs.UserDTOs;
 using TeamAlumniNETBackend.Models;
 
 namespace TeamAlumniNETBackend.Controller
 {
+    [Authorize]
     [Route("")]
     [ApiController]
     public class UsersController : ControllerBase
@@ -41,7 +43,7 @@ namespace TeamAlumniNETBackend.Controller
         /// <param name="user_id"></param>
         /// <returns></returns>
         [HttpGet("user/{user_id}")]
-        public async Task<ActionResult<User>> GetUserById(Guid user_id)
+        public async Task<ActionResult<UserGetDTO>> GetUserById(Guid user_id)
         {
             var user = await _context.Users.FindAsync(user_id);
 
@@ -50,7 +52,23 @@ namespace TeamAlumniNETBackend.Controller
                 return NotFound();
             }
 
-            return user;
+            var groups = await _context.Groups.Where(g => g.Users.Contains(user)).ToListAsync();
+            var topics = await _context.Topics.Where(t => t.Users.Contains(user)).ToListAsync();
+            var events = await _context.Events.Where(e => e.Users.Contains(user)).ToListAsync();
+
+            UserGetDTO userDTO = new UserGetDTO();
+
+            userDTO.UserId = user.UserId;
+            userDTO.UserName = user.UserName;
+            userDTO.Status = user.Status;
+            userDTO.Bio = user.Bio;
+            userDTO.Image = user.Image;
+            userDTO.FunFact = user.FunFact;
+            userDTO.Events = events;
+            userDTO.Groups = groups;
+            userDTO.Topics = topics;
+
+            return userDTO;
         }
 
         /// <summary>

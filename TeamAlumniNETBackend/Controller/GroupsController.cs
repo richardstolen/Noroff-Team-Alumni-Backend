@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -11,6 +12,7 @@ using TeamAlumniNETBackend.Models;
 
 namespace TeamAlumniNETBackend.Controller
 {
+    [Authorize]
     [Route("")]
     [ApiController]
     public class GroupsController : ControllerBase
@@ -128,11 +130,11 @@ namespace TeamAlumniNETBackend.Controller
         /// <param name="admin_id"></param>
         /// <returns></returns>
         [HttpPost("/group/{group_id}/join")]
-        public async Task<IActionResult> AddUserToGroup(int group_id, [FromForm] Guid user_id, [FromHeader] Guid admin_id)
+        public async Task<IActionResult> AddUserToGroup(int group_id, [FromHeader] Guid user_id, [FromHeader] Guid admin_id)
         {
-            Debug.WriteLine("Group id: " + group_id);
-            Debug.WriteLine("User id: " + user_id);
-            Debug.WriteLine("Admin id: " + admin_id);
+            Debug.WriteLine("\nGroup id: " + group_id);
+            Debug.WriteLine("\nUser id: " + user_id);
+            Debug.WriteLine("\nAdmin id: " + admin_id);
             // TODO ADD TO PRIVATE GROUP WITH ADMIN USER
 
             //Get user and Group
