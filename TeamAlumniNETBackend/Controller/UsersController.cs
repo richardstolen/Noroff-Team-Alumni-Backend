@@ -14,7 +14,6 @@ using TeamAlumniNETBackend.Models;
 
 namespace TeamAlumniNETBackend.Controller
 {
-    [Authorize]
     [Route("")]
     [ApiController]
     public class UsersController : ControllerBase
@@ -52,9 +51,13 @@ namespace TeamAlumniNETBackend.Controller
                 return NotFound();
             }
 
+            EventUser eventUser = new EventUser();
+            eventUser.UserId = user.UserId;
+            eventUser.User = user;
+
             var groups = await _context.Groups.Where(g => g.Users.Contains(user)).ToListAsync();
             var topics = await _context.Topics.Where(t => t.Users.Contains(user)).ToListAsync();
-            var events = await _context.Events.Where(e => e.Users.Contains(user)).ToListAsync();
+            var events = await _context.Events.Where(e => e.Users.Contains(eventUser)).ToListAsync();
 
             UserGetDTO userDTO = new UserGetDTO();
 

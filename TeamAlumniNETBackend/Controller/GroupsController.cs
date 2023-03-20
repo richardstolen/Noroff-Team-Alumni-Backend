@@ -12,7 +12,6 @@ using TeamAlumniNETBackend.Models;
 
 namespace TeamAlumniNETBackend.Controller
 {
-    [Authorize]
     [Route("")]
     [ApiController]
     public class GroupsController : ControllerBase

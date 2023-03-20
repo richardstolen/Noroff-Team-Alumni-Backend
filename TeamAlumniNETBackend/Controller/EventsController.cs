@@ -15,8 +15,7 @@ using TeamAlumniNETBackend.Models;
 
 namespace TeamAlumniNETBackend.Controller
 {
-    [Authorize]
-    [Route("api/[controller]")]
+    [Route("/event")]
     [ApiController]
     public class EventsController : ControllerBase
     {
@@ -89,14 +88,14 @@ namespace TeamAlumniNETBackend.Controller
 
         // POST: api/Events
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
-        public async Task<ActionResult<Event>> PostEvent(Event @event)
-        {
-            _context.Events.Add(@event);
-            await _context.SaveChangesAsync();
+        //[HttpPost]
+        //public async Task<ActionResult<Event>> PostEvent(Event @event)
+        //{
+        //    _context.Events.Add(@event);
+        //    await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetEvent", new { id = @event.EventId }, @event);
-        }
+        //    return CreatedAtAction("GetEvent", new { id = @event.EventId }, @event);
+        //}
 
         // DELETE: api/Events/5
         [HttpDelete("{id}")]
@@ -119,7 +118,7 @@ namespace TeamAlumniNETBackend.Controller
             return _context.Events.Any(e => e.EventId == id);
         }
 
-        [HttpDelete("event/event_id/invite/group/group_id")]
+        [HttpDelete("event_id/invite/group/group_id")]
         public async Task<IActionResult> DeleteEventGroup(Event _event, [FromHeader] int id, [FromHeader] Guid user_id, [FromHeader] string type)
         {
             var user = await _context.Users.FindAsync(user_id);
@@ -152,7 +151,7 @@ namespace TeamAlumniNETBackend.Controller
         }
 
 
-        [HttpDelete("event/event_id/invite/topic/topic_id")]
+        [HttpDelete("event_id/invite/topic/topic_id")]
         public async Task<IActionResult> DeleteEventTopic(Event _event, [FromHeader] int id, [FromHeader] Guid user_id, [FromHeader] string type)
         {
             var user = await _context.Users.FindAsync(user_id);
@@ -185,7 +184,7 @@ namespace TeamAlumniNETBackend.Controller
         }
 
 
-        [HttpDelete("event/event_id/invite/user/user_id")]
+        [HttpDelete("event_id/invite/user/user_id")]
         public async Task<IActionResult> DeleteEventUser(Event _event, [FromHeader] int id, [FromHeader] Guid user_id, [FromHeader] string type)
         {
             var user = await _context.Users.FindAsync(user_id);
@@ -253,7 +252,7 @@ namespace TeamAlumniNETBackend.Controller
         //        return CreatedAtAction("GetEvent", new { id = _event.EventId }, _event);
         //    }
 
-        [HttpPost("event/{event_id}/invite/group/{group_id}")]
+        [HttpPost("{event_id}/invite/group/{group_id}")]
         public async Task<ActionResult<Event>> PostEventGroup(int event_id, int group_id, [FromHeader] Guid user_id)
         {
             var _event = await _context.Events.FindAsync(event_id);
@@ -313,7 +312,7 @@ namespace TeamAlumniNETBackend.Controller
         //    return CreatedAtAction("GetEvent", new { id = _event.EventId }, _event);
         //}
 
-        [HttpPost("event/{event_id}/invite/topic/{topic_id}")]
+        [HttpPost("{event_id}/invite/topic/{topic_id}")]
         public async Task<ActionResult<Event>> PostEventTopic(int event_id, int topic_id, [FromHeader] Guid user_id)
         {
             var _event = await _context.Events.FindAsync(event_id);
@@ -341,16 +340,17 @@ namespace TeamAlumniNETBackend.Controller
         }
 
 
-        [HttpPost("event/event_id/invite/user/user_id")]
+        [HttpPost("event_id/invite/user/user_id")]
 
-        public async Task<ActionResult<Event>> PostEventUser(Event _event, [FromHeader] Guid user_id, [FromHeader] string type)
+        public async Task<ActionResult<Event>> PostEventUser([FromHeader] int event_id, [FromHeader] Guid user_id, [FromHeader] string type)
         {
             var user = await _context.Users.FindAsync(user_id);
+            var _event = await _context.Events.FindAsync(event_id);
 
-            if (user_id != _event.UserId)
-            {
-                return Forbid();
-            }
+            //if (user_id != _event.UserId)
+            //{
+            //    return Forbid();
+            //}
 
             if (type == "user")
             {
@@ -358,7 +358,15 @@ namespace TeamAlumniNETBackend.Controller
                 {
                     return NotFound();
                 }
-                user.Events.Add(_event);
+
+                EventUser eventUser = new EventUser();
+
+                eventUser.Event = _event;
+                eventUser.EventId = _event.EventId;
+                eventUser.UserId = user.UserId;
+                eventUser.User = user;
+
+                user.Events.Add(eventUser);
             }
 
             if (type != "user")
@@ -369,46 +377,16 @@ namespace TeamAlumniNETBackend.Controller
 
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetEvent", new { id = _event.EventId }, _event);
-        }
-
-
-        [HttpPost("event/event_id/rsvp")]
-
-        public async Task<ActionResult<Event>> PostEventRsvp(Event _event, [FromHeader] Guid user_id, [FromHeader] string type, int id)
-        {
-            var user = await _context.Users.FindAsync(user_id);
-
-            if (user_id != _event.UserId)
-            {
-                return Forbid();
-            }
-
-            if (type == "rsvp")
-            {
-                var rsvp = await _context.Rsvps.FindAsync(id);
-
-                if (user == null)
-                {
-                    return NotFound();
-                }
-                _event.Rsvps.Add(rsvp);
-            }
-
-            if (type != "rsvp")
-            {
-                return Forbid();
-            }
-
-            _context.Events.Add(_event);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetEvent", new { id = _event.EventId }, _event);
+            return NoContent();
         }
 
 
 
-        [HttpPost("event")]
+
+
+
+
+        [HttpPost("")]
         public async Task<ActionResult<Event>> PostEvent(Event _event, [FromHeader] Guid user_id, [FromHeader] string type, [FromHeader] int id)
         {
 
@@ -436,16 +414,6 @@ namespace TeamAlumniNETBackend.Controller
                 _event.Groups.Add(group);
             }
 
-            if (type == "rsvp")
-            {
-                var rsvp = await _context.Rsvps.FindAsync(id);
-
-                if (rsvp == null)
-                {
-                    return NotFound();
-                }
-                _event.Rsvps.Add(rsvp);
-            }
 
             if (type == "user")
             {
@@ -455,7 +423,15 @@ namespace TeamAlumniNETBackend.Controller
                 {
                     return NotFound();
                 }
-                _event.Users.Add(_user);
+
+                EventUser eventUser = new EventUser();
+
+                eventUser.Event = _event;
+                eventUser.EventId = _event.EventId;
+                eventUser.UserId = _user.UserId;
+                eventUser.User = _user;
+
+                _event.Users.Add(eventUser);
             }
 
             //DateTime now = DateTime.Now;

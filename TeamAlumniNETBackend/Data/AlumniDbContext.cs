@@ -11,7 +11,7 @@ namespace TeamAlumniNETBackend.Data
         public DbSet<Post>? Posts { get; set; }
         public DbSet<Topic>? Topics { get; set; }
         public DbSet<Event>? Events { get; set; }
-        public DbSet<Rsvp>? Rsvps { get; set; }
+        public DbSet<EventUser>? Rsvps { get; set; }
 
         public AlumniDbContext(DbContextOptions options) : base(options)
         {

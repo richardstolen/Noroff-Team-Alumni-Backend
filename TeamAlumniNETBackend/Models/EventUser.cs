@@ -2,14 +2,14 @@
 
 namespace TeamAlumniNETBackend.Models
 {
-    public class Rsvp
+    public class EventUser
     {
         [Key]
-        public int RsvpId { get; set; }
+        public int Id { get; set; }
         public Event? Event { get; set; }
+        public int? EventId { get; set; }
         public User? User { get; set; }
-        public DateTime LastUpdate { get; set; }
+        public Guid? UserId { get; set; }
         public bool Accepted { get; set; } = false;
-        public int? GuestCount { get; set; }
     }
 }

@@ -100,7 +100,10 @@ namespace TeamAlumniNETBackend
 
             builder.Services.AddDbContext<AlumniDbContext>(options =>
             {
-                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"), builder =>
+                {
+                    builder.EnableRetryOnFailure(5, TimeSpan.FromSeconds(10), null);
+                });
             });
             builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 

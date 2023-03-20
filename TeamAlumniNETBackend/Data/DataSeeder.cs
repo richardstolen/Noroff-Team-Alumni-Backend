@@ -70,18 +70,6 @@ namespace TeamAlumniNETBackend.Data
             return createEvents;
         }
 
-        public static List<Rsvp> GetRsvps()
-        {
-            List<Rsvp> createRsvps = new List<Rsvp>();
-            createRsvps.Add(new Rsvp()
-            {
-                RsvpId = 1,
-                LastUpdate = new DateTime(),
-                Accepted = true,
-                GuestCount = 1
-            });
-            return createRsvps;
-        }
         public static List<Post> GetPosts()
         {
             List<Post> createPosts = new List<Post>();

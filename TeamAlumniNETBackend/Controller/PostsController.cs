@@ -20,7 +20,6 @@ using Group = TeamAlumniNETBackend.Models.Group;
 
 namespace TeamAlumniNETBackend.Controller
 {
-    [Authorize]
     [Route("/post")]
     [ApiController]
     public class PostsController : ControllerBase
@@ -45,10 +44,14 @@ namespace TeamAlumniNETBackend.Controller
             // Get the User
             var user = await _context.Users.FindAsync(user_id);
 
+            EventUser eventUser = new EventUser();
+            eventUser.UserId = user.UserId;
+            eventUser.User = user;
+
             // Get Groups, topics and events that the user is subscribed to
             var groups = await _context.Groups.Where(g => g.Users.Contains(user)).ToListAsync();
             var topics = await _context.Topics.Where(t => t.Users.Contains(user)).ToListAsync();
-            var events = await _context.Events.Where(e => e.Users.Contains(user)).ToListAsync();
+            var events = await _context.Events.Where(e => e.Users.Contains(eventUser)).ToListAsync();
 
             var targetNames = new List<string>();
             var postListTuple = new List<Tuple<Post, string>>();
@@ -280,7 +283,12 @@ namespace TeamAlumniNETBackend.Controller
                 {
                     return NotFound();
                 }
-                exists = _event.Any(_event => _event.Users.Contains(user));
+
+                EventUser eventUser = new EventUser();
+                eventUser.UserId = user.UserId;
+                eventUser.User = user;
+
+                exists = _event.Any(_event => _event.Users.Contains(eventUser));
             }
             if (post.TargetTopic != null)
             {
@@ -303,6 +311,20 @@ namespace TeamAlumniNETBackend.Controller
                     return NotFound();
                 }
                 exists = group.Any(group => group.Users.Contains(user));
+            }
+
+            if (post.TargetPost != null)
+            {
+               
+                // Check if target post exists
+                var _post = _context.Posts.Where(p => p.PostId == post.TargetPost);
+                if (_post == null)
+                {
+                    return NotFound();
+                } else
+                {
+                    exists = true;
+                }
             }
 
             //if (!exists)
