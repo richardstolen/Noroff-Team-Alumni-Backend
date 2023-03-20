@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using AutoMapper;
 using AutoMapper.Execution;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -12,6 +13,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
 using TeamAlumniNETBackend.Data;
+using TeamAlumniNETBackend.DTOs.PostDTOs;
 using TeamAlumniNETBackend.Models;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 using Group = TeamAlumniNETBackend.Models.Group;
@@ -23,10 +25,11 @@ namespace TeamAlumniNETBackend.Controller
     public class PostsController : ControllerBase
     {
         private readonly AlumniDbContext _context;
-
-        public PostsController(AlumniDbContext context)
+        private readonly IMapper _mapper;
+        public PostsController(IMapper mapper, AlumniDbContext context)
         {
             _context = context;
+            _mapper = mapper;
         }
 
         /// <summary>
@@ -36,7 +39,7 @@ namespace TeamAlumniNETBackend.Controller
         /// <param name="user_id"></param>
         /// <returns>List of posts</returns>
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Post>>> GetPosts([FromHeader] Guid user_id)
+        public async Task<ActionResult<IEnumerable<PostGetDTO>>> GetPosts([FromHeader] Guid user_id)
         {
             // Get the User
             var user = await _context.Users.FindAsync(user_id);
@@ -46,7 +49,8 @@ namespace TeamAlumniNETBackend.Controller
             var topics = await _context.Topics.Where(t => t.Users.Contains(user)).ToListAsync();
             var events = await _context.Events.Where(e => e.Users.Contains(user)).ToListAsync();
 
-            var postList = new List<Post>();
+            var targetNames = new List<string>();
+            var postListTuple = new List<Tuple<Post, string>>();
 
             /*
              *  Looping through all groups, topics and events and getting all posts from them.
@@ -54,30 +58,54 @@ namespace TeamAlumniNETBackend.Controller
             foreach (var group in groups)
             {
                 var groupPosts = await _context.Posts.Where(p => p.TargetGroup == group.GroupId).ToListAsync();
-                postList.AddRange(groupPosts);
+
+                foreach (var post in groupPosts)
+                {
+                    var postTuple = new Tuple<Post, string>(post, group.Name == null ? "NO NAME" : group.Name);
+                    postListTuple.Add(postTuple);
+                }
             }
 
             foreach (var topic in topics)
             {
                 var topicPosts = await _context.Posts.Where(p => p.TargetTopic == topic.TopicId).ToListAsync();
-                postList.AddRange(topicPosts);
+                foreach (var post in topicPosts)
+                {
+                    var postTuple = new Tuple<Post, string>(post, topic.Name == null ? "NO NAME" : topic.Name);
+                    postListTuple.Add(postTuple);
+                }
             }
 
             foreach (var @event in events)
             {
                 var eventPosts = await _context.Posts.Where(e => e.TargetEvent == @event.EventId).ToListAsync();
-                postList.AddRange(eventPosts);
+                foreach (var post in eventPosts)
+                {
+                    var postTuple = new Tuple<Post, string>(post, @event.Description == null ? "NO NAME" : @event.Description);
+                    postListTuple.Add(postTuple);
+                }
             }
 
-            if (postList == null)
+            var postDTOList = new List<PostGetDTO>();
+
+            for (int i = 0; i < postListTuple.Count; i++)
             {
-                return NotFound();
+                var postDTO = new PostGetDTO();
+                postDTO.PostId = postListTuple[i].Item1.PostId;
+                var createdBy = await _context.Users.FindAsync(postListTuple[i].Item1.UserId);
+                postDTO.CreatedBy = createdBy?.UserName;
+                postDTO.LastUpdate = postListTuple[i].Item1.LastUpdate;
+                postDTO.Body = postListTuple[i].Item1.Body;
+                postDTO.Title = postListTuple[i].Item1.Title;
+                postDTO.Target = postListTuple[i].Item2;
+                postDTO.Comments = await _context.Posts.Where(p => p.TargetPost == postListTuple[i].Item1.PostId).ToListAsync();
+                postDTOList.Add(postDTO);
             }
 
             // Sorting the list, with last updated post first
-            postList.Sort((x, y) => DateTime.Compare(y.LastUpdate, x.LastUpdate));
+            postDTOList.Sort((x, y) => DateTime.Compare(y.LastUpdate, x.LastUpdate));
 
-            return postList;
+            return postDTOList;
         }
 
         /// <summary>
@@ -188,12 +216,15 @@ namespace TeamAlumniNETBackend.Controller
         /// Edit a post.
         /// </summary>
         /// <param name="id"></param>
-        /// <param name="post"></param>
+        /// <param name="post_id"></param>
         /// <returns></returns>
         [HttpPatch("{post_id}")]
         public async Task<IActionResult> PatchPost(int post_id, Post post, [FromHeader] Guid user_id)
         {
-            if (post.TargetGroup != null || post.TargetPost != null || post.TargetUser != null || post.TargetEvent != null || post.TargetTopic != null )
+            Debug.WriteLine("\n\n\nPost: " + post);
+            Debug.WriteLine("\n\n\nPostid: " + post_id);
+            Debug.WriteLine("\n\n\nUser_id: " + user_id);
+            if (post.TargetGroup != null || post.TargetPost != null || post.TargetUser != null || post.TargetEvent != null || post.TargetTopic != null)
             {
                 return Forbid();
             }
@@ -229,7 +260,7 @@ namespace TeamAlumniNETBackend.Controller
             // Save to DB
             await _context.SaveChangesAsync();
             return NoContent();
-         
+
         }
 
 
@@ -273,10 +304,10 @@ namespace TeamAlumniNETBackend.Controller
                 exists = group.Any(group => group.Users.Contains(user));
             }
 
-            if (!exists)
-            {
-                return Forbid();
-            }
+            //if (!exists)
+            //{
+            //    return Forbid();
+            //}
 
             DateTime now = DateTime.Now;
             post.LastUpdate = now;

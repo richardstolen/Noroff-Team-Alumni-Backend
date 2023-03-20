@@ -20,7 +20,7 @@ namespace TeamAlumniNETBackend.Models
 
         public override string? ToString()
         {
-            return $"Postid: {PostId}, Title: {Title}";
+            return $"Postid: {PostId}, Title: {Title}, Body: {Body}";
         }
     }
 }
