@@ -1,22 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
+﻿using System.Diagnostics;
 using System.Reflection;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
+using System.Runtime.CompilerServices;
 using AutoMapper;
-using AutoMapper.Execution;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Hosting;
 using TeamAlumniNETBackend.Data;
 using TeamAlumniNETBackend.DTOs.PostDTOs;
 using TeamAlumniNETBackend.Models;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
-using Group = TeamAlumniNETBackend.Models.Group;
 
 namespace TeamAlumniNETBackend.Controller
 {
@@ -102,7 +93,21 @@ namespace TeamAlumniNETBackend.Controller
                 postDTO.Body = postListTuple[i].Item1.Body;
                 postDTO.Title = postListTuple[i].Item1.Title;
                 postDTO.Target = postListTuple[i].Item2;
-                postDTO.Comments = await _context.Posts.Where(p => p.TargetPost == postListTuple[i].Item1.PostId).ToListAsync();
+                var comments = await _context.Posts.Where(p => p.TargetPost == postListTuple[i].Item1.PostId).ToListAsync();
+
+                foreach (var comment in comments)
+                {
+                    var commentDTO = new CommentDTO();
+                    commentDTO.PostId = comment.PostId;
+                    var _createdBy = await _context.Users.FindAsync(comment.UserId);
+                    commentDTO.CreatedBy = _createdBy.UserName;
+                    commentDTO.Target = comment.TargetPost;
+                    commentDTO.LastUpdate = comment.LastUpdate;
+                    commentDTO.Body = comment.Body;
+                    commentDTO.Title = comment.Title;
+                    postDTO.Comments.Add(commentDTO);
+                }
+
                 postDTOList.Add(postDTO);
             }
 
@@ -118,15 +123,105 @@ namespace TeamAlumniNETBackend.Controller
         /// <param name="user_id"></param>
         /// <returns>List of posts</returns>
         [HttpGet("user")]
-        public async Task<ActionResult<IEnumerable<Post>>> GetDirectMessages([FromHeader] Guid user_id)
+        public async Task<ActionResult<IEnumerable<DirectMessagesDTO>>> GetDirectMessages([FromHeader] Guid user_id)
         {
-            var postList = await _context.Posts.Where(post => post.TargetUser == user_id).ToListAsync();
+            var messagesIncoming = await _context.Posts.Where(post => post.TargetUser == user_id).ToListAsync();
+            var messagesOutgoing = await _context.Posts.Where(post => post.UserId == user_id).Where(post => post.TargetUser != null).ToListAsync();
 
-            if (postList == null)
+
+            var dmDTOList = new List<DirectMessagesDTO>();
+
+            foreach (var message in messagesIncoming)
+            {
+                var element = dmDTOList.Find(x => x.SenderID == message.UserId);
+                if (element != null)
+                {
+                    var commentDTO = new CommentDTO();
+                    commentDTO.PostId = message.PostId;
+                    var _createdBy = await _context.Users.FindAsync(message.UserId);
+                    commentDTO.CreatedBy = _createdBy.UserName;
+                    commentDTO.Target = message.TargetPost;
+                    commentDTO.LastUpdate = message.LastUpdate;
+                    commentDTO.Body = message.Body;
+                    commentDTO.Title = message.Title;
+                    element.Messages.Add(commentDTO);
+
+                }
+                else
+                {
+                    var dmDTO = new DirectMessagesDTO();
+
+                    dmDTO.SenderID = message.UserId;
+                    var _createdBy = await _context.Users.FindAsync(message.UserId);
+                    dmDTO.Sender = _createdBy.UserName;
+                    dmDTO.Image = _createdBy.Image;
+
+                    var commentDTO = new CommentDTO();
+                    commentDTO.PostId = message.PostId;
+                    commentDTO.CreatedBy = _createdBy.UserName;
+                    commentDTO.Target = message.TargetPost;
+                    commentDTO.LastUpdate = message.LastUpdate;
+                    commentDTO.Body = message.Body;
+                    commentDTO.Title = message.Title;
+                    dmDTO.Messages.Add(commentDTO);
+
+                    dmDTOList.Add(dmDTO);
+                }
+
+            }
+
+            foreach (var message in messagesOutgoing)
+            {
+                var element = dmDTOList.Find(x => x.SenderID == message.TargetUser);
+                if (element != null)
+                {
+                    var commentDTO = new CommentDTO();
+                    commentDTO.PostId = message.PostId;
+                    var _createdBy = await _context.Users.FindAsync(message.UserId);
+                    commentDTO.CreatedBy = _createdBy.UserName;
+                    commentDTO.Target = message.TargetPost;
+                    commentDTO.LastUpdate = message.LastUpdate;
+                    commentDTO.Body = message.Body;
+                    commentDTO.Title = message.Title;
+                    element.Messages.Add(commentDTO);
+
+                }
+                else
+                {
+                    var dmDTO = new DirectMessagesDTO();
+
+                    dmDTO.SenderID = message.UserId;
+                    var _createdBy = await _context.Users.FindAsync(message.UserId);
+                    dmDTO.Sender = _createdBy.UserName;
+                    dmDTO.Image = _createdBy.Image;
+
+                    var commentDTO = new CommentDTO();
+                    commentDTO.PostId = message.PostId;
+                    commentDTO.CreatedBy = _createdBy.UserName;
+                    commentDTO.Target = message.TargetPost;
+                    commentDTO.LastUpdate = message.LastUpdate;
+                    commentDTO.Body = message.Body;
+                    commentDTO.Title = message.Title;
+                    dmDTO.Messages.Add(commentDTO);
+
+                    dmDTOList.Add(dmDTO);
+                }
+
+            }
+
+            if (messagesIncoming == null)
             {
                 return NotFound();
             }
-            return postList;
+
+            foreach (var dmList in dmDTOList)
+            {
+                dmList.Messages.Sort((x, y) => DateTime.Compare(y.LastUpdate, x.LastUpdate));
+            }
+
+
+
+            return dmDTOList;
         }
 
         /// <summary>
@@ -315,13 +410,14 @@ namespace TeamAlumniNETBackend.Controller
 
             if (post.TargetPost != null)
             {
-               
+
                 // Check if target post exists
                 var _post = _context.Posts.Where(p => p.PostId == post.TargetPost);
                 if (_post == null)
                 {
                     return NotFound();
-                } else
+                }
+                else
                 {
                     exists = true;
                 }

@@ -15,6 +15,7 @@ using TeamAlumniNETBackend.Models;
 
 namespace TeamAlumniNETBackend.Controller
 {
+    [Authorize]
     [Route("/event")]
     [ApiController]
     public class EventsController : ControllerBase

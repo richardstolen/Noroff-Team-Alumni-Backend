@@ -10,6 +10,6 @@ namespace TeamAlumniNETBackend.DTOs.PostDTOs
         public string? Body { get; set; }
         public DateTime LastUpdate { get; set; }
         public string? Target { get; set; }
-        public ICollection<Post>? Comments { get; set; }
+        public ICollection<CommentDTO>? Comments { get; set; } = new List<CommentDTO>();
     }
 }

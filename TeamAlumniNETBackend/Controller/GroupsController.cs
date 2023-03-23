@@ -155,6 +155,36 @@ namespace TeamAlumniNETBackend.Controller
         }
 
         /// <summary>
+        /// Remove user from Group. If private group, needs Admin_id to be equal
+        /// to the user to who created the group.
+        /// </summary>
+        /// <param name="group_id"></param>
+        /// <param name="user_id"></param>
+        /// <returns></returns>
+        [HttpPost("/group/{group_id}/remove")]
+        public async Task<IActionResult> RemoveUserFromGroup(int group_id, [FromHeader] Guid user_id)
+        {
+            // Load the parent entity that contains the collection of child entities
+            var parentEntity = _context.Groups.Include(p => p.Users).FirstOrDefault(p => p.GroupId == group_id);
+
+            if (parentEntity == null)
+            {
+                return NotFound();
+            }
+
+            // Get the child entity that you want to delete
+            var childEntity = parentEntity.Users.FirstOrDefault(c => c.UserId == user_id);
+
+            // Remove the child entity from the parent entity's collection of child entities
+            parentEntity.Users.Remove(childEntity);
+
+            // Save the changes to the database
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
+
+        /// <summary>
         /// Check if group exists in DB.
         /// </summary>
         /// <param name="id"></param>

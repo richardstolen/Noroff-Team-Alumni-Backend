@@ -8,6 +8,7 @@ namespace TeamAlumniNETBackend.Models
         [Key]
         public int EventId { get; set; }
         public Guid? UserId { get; set; }
+        public string? Title { get; set; }
         public string? Description { get; set; }
         public DateTime Date { get; set; }
         public ICollection<Topic>? Topics { get; set; } = new List<Topic>();

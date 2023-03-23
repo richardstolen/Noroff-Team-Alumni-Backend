@@ -18,5 +18,10 @@ namespace TeamAlumniNETBackend.Models
         public ICollection<Group>? Groups { get; set; }
         public ICollection<EventUser>? Events { get; set; } = new List<EventUser>();
         public ICollection<Topic>? Topics { get; set; }
+
+        public override string? ToString()
+        {
+            return $"Username: {UserName}";
+        }
     }
 }
