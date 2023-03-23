@@ -11,6 +11,7 @@ using TeamAlumniNETBackend.Models;
 
 namespace TeamAlumniNETBackend.Controller
 {
+    [Authorize]
     [Route("/post")]
     [ApiController]
     public class PostsController : ControllerBase
