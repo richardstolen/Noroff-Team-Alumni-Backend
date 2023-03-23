@@ -27,6 +27,12 @@ namespace TeamAlumniNETBackend.Controller
             _context = context;
         }
 
+        /// <summary>
+        /// Get all evntes by user_id
+        /// </summary>
+        /// <param name="user_id"></param>
+        /// <returns>Events</returns>
+
         [HttpGet("/event")]
         public async Task<ActionResult<IEnumerable<Event>>> GetEvents([FromHeader] Guid user_id)
         {
@@ -39,7 +45,11 @@ namespace TeamAlumniNETBackend.Controller
             return (eventList);
         }
 
-        // GET: api/Events/5
+        /// <summary>
+        /// Get event by Event id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns>Event</returns>
         [HttpGet("{id}")]
         public async Task<ActionResult<Event>> GetEvent(int id)
         {
@@ -53,8 +63,13 @@ namespace TeamAlumniNETBackend.Controller
             return @event;
         }
 
-        // PUT: api/Events/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        /// <summary>
+        /// Update an event
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="event"></param>
+        /// <param name="user_id"></param>
+        /// <returns>Updated event</returns>
         [HttpPatch("{id}")]
         public async Task<IActionResult> PatchEvent(int id, Event @event, [FromHeader] Guid user_id)
         {
@@ -87,18 +102,13 @@ namespace TeamAlumniNETBackend.Controller
             return NoContent();
         }
 
-        // POST: api/Events
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        //[HttpPost]
-        //public async Task<ActionResult<Event>> PostEvent(Event @event)
-        //{
-        //    _context.Events.Add(@event);
-        //    await _context.SaveChangesAsync();
+       
 
-        //    return CreatedAtAction("GetEvent", new { id = @event.EventId }, @event);
-        //}
-
-        // DELETE: api/Events/5
+        /// <summary>
+        /// Delete event by Event id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteEvent(int id)
         {
@@ -119,6 +129,14 @@ namespace TeamAlumniNETBackend.Controller
             return _context.Events.Any(e => e.EventId == id);
         }
 
+        /// <summary>
+        /// Delete an evnt by Group id
+        /// </summary>
+        /// <param name="_event"></param>
+        /// <param name="id"></param>
+        /// <param name="user_id"></param>
+        /// <param name="type"></param>
+        /// <returns></returns>
         [HttpDelete("event_id/invite/group/group_id")]
         public async Task<IActionResult> DeleteEventGroup(Event _event, [FromHeader] int id, [FromHeader] Guid user_id, [FromHeader] string type)
         {
@@ -151,7 +169,14 @@ namespace TeamAlumniNETBackend.Controller
             return NoContent();
         }
 
-
+        /// <summary>
+        /// Delte an event by Topic id
+        /// </summary>
+        /// <param name="_event"></param>
+        /// <param name="id"></param>
+        /// <param name="user_id"></param>
+        /// <param name="type"></param>
+        /// <returns></returns>
         [HttpDelete("event_id/invite/topic/topic_id")]
         public async Task<IActionResult> DeleteEventTopic(Event _event, [FromHeader] int id, [FromHeader] Guid user_id, [FromHeader] string type)
         {
@@ -184,7 +209,14 @@ namespace TeamAlumniNETBackend.Controller
             return NoContent();
         }
 
-
+        /// <summary>
+        /// Delete an event by User id
+        /// </summary>
+        /// <param name="_event"></param>
+        /// <param name="id"></param>
+        /// <param name="user_id"></param>
+        /// <param name="type"></param>
+        /// <returns></returns>
         [HttpDelete("event_id/invite/user/user_id")]
         public async Task<IActionResult> DeleteEventUser(Event _event, [FromHeader] int id, [FromHeader] Guid user_id, [FromHeader] string type)
         {
@@ -218,45 +250,26 @@ namespace TeamAlumniNETBackend.Controller
         }
 
 
-
-
-        //[HttpPost("event/event_id/invite/group/group_id")]
-
-        //public async Task <ActionResult<Event>> PostEventGroup(Event _event, [FromHeader] Guid user_id, [FromHeader] string type, [FromHeader] int id) 
-        //{
-        //    var user = await _context.Users.FindAsync(user_id);
-
-        //    if (user_id != _event.UserId)
-        //    {
-        //        return Forbid();
-        //    }
-
-        //    if (type == "group")
-        //    {
-        //        var group = await _context.Groups.FindAsync(id);
-
-        //        if (group == null)
-        //        {
-        //            return NotFound();
-        //        }
-        //        _event.Groups.Add(group);
-        //    }
-
-        //    if (type!= "group") 
-        //    {
-        //        return Forbid();
-        //    }
-
-        //        _context.Events.Add(_event);
-        //        await _context.SaveChangesAsync();
-
-        //        return CreatedAtAction("GetEvent", new { id = _event.EventId }, _event);
-        //    }
-
-        [HttpPost("{event_id}/invite/group/{group_id}")]
-        public async Task<ActionResult<Event>> PostEventGroup(int event_id, int group_id, [FromHeader] Guid user_id)
+        /// <summary>
+        /// Create an event for a spesific group
+        /// </summary>
+        /// <param name="event_id"></param>
+        /// <param name="group_id"></param>
+        /// <param name="user_id"></param>
+        /// <returns>Event to a spesific group</returns>
+        [HttpPost("event_id/invite/group/group_id")]
+        public async Task<ActionResult<Event>> PostEventGroup([FromHeader] int event_id,  [FromHeader] int group_id, [FromHeader] Guid user_id)
         {
             var _event = await _context.Events.FindAsync(event_id);
+
+            foreach (var exist in _event.Groups)
+            {
+                if (exist.GroupId == group_id)
+                {
+                    return Conflict();
+                }
+            }
+
             if (_event == null)
             {
                 return NotFound();
@@ -273,6 +286,8 @@ namespace TeamAlumniNETBackend.Controller
                 return NotFound();
             }
 
+            
+
             _event.Groups.Add(group);
             _context.Events.Update(_event);
             await _context.SaveChangesAsync();
@@ -280,43 +295,26 @@ namespace TeamAlumniNETBackend.Controller
             return CreatedAtAction("GetEvent", new { id = _event.EventId }, _event);
         }
 
-        //[HttpPost("event/event_id/invite/topic/topic_id")]
-
-        //public async Task<ActionResult<Event>> PostEventTopic(Event _event, [FromHeader] Guid user_id, [FromHeader] string type, [FromHeader] int id)
-        //{
-        //    var user = await _context.Users.FindAsync(user_id);
-
-        //    if (user_id != _event.UserId)
-        //    {
-        //        return Forbid();
-        //    }
-
-        //    if (type == "topic")
-        //    {
-        //        var topic = await _context.Topics.FindAsync(id);
-
-        //        if (topic == null)
-        //        {
-        //            return NotFound();
-        //        }
-        //        _event.Topics.Add(topic);
-        //    }
-
-        //    if (type != "topic")
-        //    {
-        //        return Forbid();
-        //    }
-
-        //    _context.Events.Add(_event);
-        //    await _context.SaveChangesAsync();
-
-        //    return CreatedAtAction("GetEvent", new { id = _event.EventId }, _event);
-        //}
-
-        [HttpPost("{event_id}/invite/topic/{topic_id}")]
-        public async Task<ActionResult<Event>> PostEventTopic(int event_id, int topic_id, [FromHeader] Guid user_id)
+        /// <summary>
+        /// Create an event for a spesific topic
+        /// </summary>
+        /// <param name="event_id"></param>
+        /// <param name="topic_id"></param>
+        /// <param name="user_id"></param>
+        /// <returns>Event to a spesific topic</returns>
+        [HttpPost("event_id/invite/topic/topic_id")]
+        public async Task<ActionResult<Event>> PostEventTopic([FromHeader] int event_id, [FromHeader] int topic_id, [FromHeader] Guid user_id)
         {
             var _event = await _context.Events.FindAsync(event_id);
+
+            foreach (var exist in _event.Topics)
+            {
+                if (exist.TopicId == topic_id)
+                {
+                    return Conflict();
+                }
+            }
+
             if (_event == null)
             {
                 return NotFound();
@@ -340,7 +338,13 @@ namespace TeamAlumniNETBackend.Controller
             return CreatedAtAction("GetEvent", new { id = _event.EventId }, _event);
         }
 
-
+        /// <summary>
+        /// Create an event for a spesific user
+        /// </summary>
+        /// <param name="event_id"></param>
+        /// <param name="user_id"></param>
+        /// <param name="type"></param>
+        /// <returns>Event to a spesific user</returns>
         [HttpPost("event_id/invite/user/user_id")]
 
         public async Task<ActionResult<Event>> PostEventUser([FromHeader] int event_id, [FromHeader] Guid user_id, [FromHeader] string type)
@@ -348,10 +352,18 @@ namespace TeamAlumniNETBackend.Controller
             var user = await _context.Users.FindAsync(user_id);
             var _event = await _context.Events.FindAsync(event_id);
 
-            //if (user_id != _event.UserId)
-            //{
-            //    return Forbid();
-            //}
+            if (user_id != _event.UserId)
+            {
+                return Forbid();
+            }
+
+            foreach (var exist in _event.Users)
+            {
+                if (exist.UserId == user_id)
+                {
+                    return Conflict();
+                }
+            }
 
             if (type == "user")
             {
@@ -382,11 +394,14 @@ namespace TeamAlumniNETBackend.Controller
         }
 
 
-
-
-
-
-
+        /// <summary>
+        /// Create an event for a spesific user, group or topic
+        /// </summary>
+        /// <param name="_event"></param>
+        /// <param name="user_id"></param>
+        /// <param name="type"></param>
+        /// <param name="id"></param>
+        /// <returns>Event to a spesific user, group or topic</returns>
         [HttpPost("")]
         public async Task<ActionResult<Event>> PostEvent(Event _event, [FromHeader] Guid user_id, [FromHeader] string type, [FromHeader] int id)
         {
@@ -435,8 +450,6 @@ namespace TeamAlumniNETBackend.Controller
                 _event.Users.Add(eventUser);
             }
 
-            //DateTime now = DateTime.Now;
-            //_event.LastUpdate = now;
             _context.Events.Add(_event);
             await _context.SaveChangesAsync();
 
