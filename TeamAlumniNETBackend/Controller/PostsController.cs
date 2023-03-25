@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System.Collections.Immutable;
+using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using AutoMapper;
@@ -90,6 +91,7 @@ namespace TeamAlumniNETBackend.Controller
                 postDTO.PostId = postListTuple[i].Item1.PostId;
                 var createdBy = await _context.Users.FindAsync(postListTuple[i].Item1.UserId);
                 postDTO.CreatedBy = createdBy?.UserName;
+                postDTO.Image = createdBy?.Image;
                 postDTO.LastUpdate = postListTuple[i].Item1.LastUpdate;
                 postDTO.Body = postListTuple[i].Item1.Body;
                 postDTO.Title = postListTuple[i].Item1.Title;
@@ -102,12 +104,16 @@ namespace TeamAlumniNETBackend.Controller
                     commentDTO.PostId = comment.PostId;
                     var _createdBy = await _context.Users.FindAsync(comment.UserId);
                     commentDTO.CreatedBy = _createdBy.UserName;
+                    commentDTO.Image = _createdBy?.Image;
                     commentDTO.Target = comment.TargetPost;
                     commentDTO.LastUpdate = comment.LastUpdate;
                     commentDTO.Body = comment.Body;
                     commentDTO.Title = comment.Title;
                     postDTO.Comments.Add(commentDTO);
                 }
+
+                postDTO.Comments = postDTO.Comments.OrderBy(x => x.LastUpdate).ToList();
+
 
                 postDTOList.Add(postDTO);
             }
@@ -220,7 +226,8 @@ namespace TeamAlumniNETBackend.Controller
                 dmList.Messages.Sort((x, y) => DateTime.Compare(y.LastUpdate, x.LastUpdate));
             }
 
-
+            // sort the parents by the names of their children
+            dmDTOList = dmDTOList.OrderByDescending(p => p.Messages.OrderBy(c => c.LastUpdate).LastOrDefault()?.LastUpdate).ToList();
 
             return dmDTOList;
         }
@@ -249,15 +256,64 @@ namespace TeamAlumniNETBackend.Controller
         /// <param name="targetGroup"></param>
         /// <returns>List of posts</returns>
         [HttpGet("group/group_id")]
-        public async Task<ActionResult<IEnumerable<Post>>> GetPostsByGroup([FromHeader] int targetGroup)
+        public async Task<ActionResult<IEnumerable<PostGetDTO>>> GetPostsByGroup([FromHeader] int targetGroup)
         {
-            var groupPost = await _context.Posts.Where(Post => Post.TargetGroup == targetGroup).ToListAsync();
+            var group = await _context.Groups.FindAsync(targetGroup);
 
-            if (groupPost == null)
+            if (group == null)
             {
                 return NotFound();
             }
-            return groupPost;
+
+            var groupPost = await _context.Posts.Where(Post => Post.TargetGroup == targetGroup).ToListAsync();
+
+            var postListTuple = new List<Tuple<Post, string>>();
+
+            foreach (var post in groupPost)
+            {
+                var postTuple = new Tuple<Post, string>(post, group.Name == null ? "NO NAME" : group.Name);
+                postListTuple.Add(postTuple);
+            }
+
+            var postDTOList = new List<PostGetDTO>();
+
+            for (int i = 0; i < postListTuple.Count; i++)
+            {
+                var postDTO = new PostGetDTO();
+                postDTO.PostId = postListTuple[i].Item1.PostId;
+                var createdBy = await _context.Users.FindAsync(postListTuple[i].Item1.UserId);
+                postDTO.CreatedBy = createdBy?.UserName;
+                postDTO.Image = createdBy?.Image;
+                postDTO.LastUpdate = postListTuple[i].Item1.LastUpdate;
+                postDTO.Body = postListTuple[i].Item1.Body;
+                postDTO.Title = postListTuple[i].Item1.Title;
+                postDTO.Target = postListTuple[i].Item2;
+                var comments = await _context.Posts.Where(p => p.TargetPost == postListTuple[i].Item1.PostId).ToListAsync();
+
+                foreach (var comment in comments)
+                {
+                    var commentDTO = new CommentDTO();
+                    commentDTO.PostId = comment.PostId;
+                    var _createdBy = await _context.Users.FindAsync(comment.UserId);
+                    commentDTO.CreatedBy = _createdBy.UserName;
+                    commentDTO.Image = _createdBy?.Image;
+                    commentDTO.Target = comment.TargetPost;
+                    commentDTO.LastUpdate = comment.LastUpdate;
+                    commentDTO.Body = comment.Body;
+                    commentDTO.Title = comment.Title;
+
+                    postDTO.Comments.Add(commentDTO);
+                }
+
+                postDTO.Comments = postDTO.Comments.OrderBy(x => x.LastUpdate).ToList();
+
+                postDTOList.Add(postDTO);
+            }
+
+            // Sorting the list, with last updated post first
+            postDTOList.Sort((x, y) => DateTime.Compare(y.LastUpdate, x.LastUpdate));
+
+            return postDTOList;
         }
 
         /// <summary>
@@ -354,8 +410,7 @@ namespace TeamAlumniNETBackend.Controller
                     existingEntity.GetType().GetProperty(prop.Name)?.SetValue(existingEntity, prop.GetValue(post));
                 }
             }
-            DateTime now = DateTime.Now;
-            existingEntity.LastUpdate = now;
+            existingEntity.LastUpdate = GetDateNow();
 
             // Save to DB
             await _context.SaveChangesAsync();
@@ -465,6 +520,19 @@ namespace TeamAlumniNETBackend.Controller
         private bool PostExists(int id)
         {
             return _context.Posts.Any(e => e.PostId == id);
+        }
+
+        private DateTime GetDateNow()
+        {
+            DateTime thisTime = DateTime.Now;
+            bool isDaylight = TimeZoneInfo.Local.IsDaylightSavingTime(thisTime);
+
+            if (isDaylight)
+            {
+                thisTime.AddHours(1);
+            }
+
+            return thisTime;
         }
     }
 }
