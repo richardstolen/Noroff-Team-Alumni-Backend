@@ -27,16 +27,90 @@ namespace TeamAlumniNETBackend.Controller
             _context = context;
         }
 
+        ///// <summary>
+        ///// Get all events by user_id
+        ///// </summary>
+        ///// <param name="user_id"></param>
+        ///// <returns>Events</returns>
+
+        //[HttpGet("/event")]
+        //public async Task<ActionResult<IEnumerable<Event>>> GetEvents([FromHeader] Guid user_id)
+        //{
+        //    var eventList = await _context.Events.Where(Event => Event.UserId == user_id).ToListAsync();
+
+        //    if (eventList == null)
+        //    {
+        //        return NotFound();
+        //    }
+        //    return (eventList);
+        //}
+
+
         /// <summary>
-        /// Get all evntes by user_id
+        /// Get all events by user_id
         /// </summary>
         /// <param name="user_id"></param>
         /// <returns>Events</returns>
-
         [HttpGet("/event")]
-        public async Task<ActionResult<IEnumerable<Event>>> GetEvents([FromHeader] Guid user_id)
+        public async Task<ActionResult<IEnumerable<Event>>> GetAvailableEvents([FromHeader] Guid user_id)
         {
-            var eventList = await _context.Events.Where(Event => Event.UserId == user_id).ToListAsync();
+            var user = await _context.Users.FindAsync(user_id);
+
+            var groups = await _context.Groups.Where(g => g.Users.Contains(user)).ToListAsync();
+
+            List<Event> eventList = new List<Event>();
+
+            foreach (var group in groups)
+            {
+                var _events = await _context.Events.Where(e => e.Groups.Contains(group)).ToListAsync();
+
+                foreach (var _event in _events)
+                {
+                    eventList.Add(_event);
+                }
+            }
+
+            var topics = await _context.Topics.Where(t => t.Users.Contains(user)).ToListAsync();
+
+            foreach (var topic in topics)
+            {
+                var _events = await _context.Events.Where(e => e.Topics.Contains(topic)).ToListAsync();
+
+                foreach (var _event in _events)
+                {
+                    eventList.Add(_event);
+                }
+            }
+
+            if (eventList == null)
+            {
+                return NotFound();
+            }
+            return (eventList);
+        }
+
+        /// <summary>
+        /// Get all events by user_id
+        /// </summary>
+        /// <param name="user_id"></param>
+        /// <returns>Events</returns>
+        [HttpGet("/event/accepted")]
+        public async Task<ActionResult<IEnumerable<Event>>> GetAcceptedEvents([FromHeader] Guid user_id)
+        {
+            var user = await _context.Users.FindAsync(user_id);
+
+            var rsvps = await _context.Rsvps.Where(r => r.UserId == user.UserId && r.Accepted == true).ToListAsync();
+
+            var eventList = new List<Event>();
+
+            foreach (var rsvp in rsvps)
+            {
+                var _events = await _context.Events.Where(e => e.EventId == rsvp.EventId).ToListAsync();
+                foreach (var _event in _events)
+                {
+                    eventList.Add(_event);
+                }
+            }
 
             if (eventList == null)
             {
@@ -102,7 +176,7 @@ namespace TeamAlumniNETBackend.Controller
             return NoContent();
         }
 
-       
+
 
         /// <summary>
         /// Delete event by Event id
@@ -258,7 +332,7 @@ namespace TeamAlumniNETBackend.Controller
         /// <param name="user_id"></param>
         /// <returns>Event to a spesific group</returns>
         [HttpPost("event_id/invite/group/group_id")]
-        public async Task<ActionResult<Event>> PostEventGroup([FromHeader] int event_id,  [FromHeader] int group_id, [FromHeader] Guid user_id)
+        public async Task<ActionResult<Event>> PostEventGroup([FromHeader] int event_id, [FromHeader] int group_id, [FromHeader] Guid user_id)
         {
             var _event = await _context.Events.FindAsync(event_id);
 
@@ -286,7 +360,7 @@ namespace TeamAlumniNETBackend.Controller
                 return NotFound();
             }
 
-            
+
 
             _event.Groups.Add(group);
             _context.Events.Update(_event);
@@ -450,10 +524,96 @@ namespace TeamAlumniNETBackend.Controller
                 _event.Users.Add(eventUser);
             }
 
+
             _context.Events.Add(_event);
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetEvent", new { id = _event.EventId }, _event);
+        }
+
+        /// <summary>
+        /// Join event
+        /// </summary>
+        /// <param name="user_id"></param>
+        /// <param name="event_id"></param>
+        /// <returns>Event to a spesific user, group or topic</returns>
+        [HttpPost("join")]
+        public async Task<ActionResult<Event>> JoinEvent([FromHeader] Guid user_id, [FromHeader] int event_id)
+        {
+
+            var user = await _context.Users.FindAsync(user_id);
+            var _event = await _context.Events.FindAsync(event_id);
+
+            EventUser eventUser = new EventUser();
+
+            eventUser.Event = _event;
+            eventUser.EventId = _event.EventId;
+            eventUser.UserId = user.UserId;
+            eventUser.User = user;
+            eventUser.Accepted = true;
+
+            _context.Rsvps.Add(eventUser);
+
+            await _context.SaveChangesAsync();
+
+            return Ok();
+        }
+
+        /// <summary>
+        /// Join event
+        /// </summary>
+        /// <param name="user_id"></param>
+        /// <param name="event_id"></param>
+        /// <returns>Event to a spesific user, group or topic</returns>
+        [HttpPost("leave")]
+        public async Task<ActionResult<Event>> LeaveEvent([FromHeader] Guid user_id, [FromHeader] int event_id)
+        {
+
+            var user = await _context.Users.FindAsync(user_id);
+            var _event = await _context.Events.FindAsync(event_id);
+
+            EventUser eventUser = new EventUser();
+
+            eventUser.Event = _event;
+            eventUser.EventId = _event.EventId;
+            eventUser.UserId = user.UserId;
+            eventUser.User = user;
+            eventUser.Accepted = true;
+
+            _context.Rsvps.Remove(eventUser);
+
+            await _context.SaveChangesAsync();
+
+            return Ok();
+        }
+
+        /// <summary>
+        /// Remove user from Event.
+        /// </summary>
+        /// <param name="event_id"></param>
+        /// <param name="user_id"></param>
+        /// <returns></returns>
+        [HttpPost("{event_id}/remove")]
+        public async Task<IActionResult> RemoveUserFromEvent(int event_id, [FromHeader] Guid user_id)
+        {
+            // Load the parent entity that contains the collection of child entities
+            var parentEntity = _context.Events.Include(p => p.Users).FirstOrDefault(p => p.EventId == event_id);
+
+            if (parentEntity == null)
+            {
+                return NotFound();
+            }
+
+            // Get the child entity that you want to delete
+            var childEntity = parentEntity.Users.FirstOrDefault(c => c.UserId == user_id);
+
+            // Remove the child entity from the parent entity's collection of child entities
+            parentEntity.Users.Remove(childEntity);
+
+            // Save the changes to the database
+            await _context.SaveChangesAsync();
+
+            return NoContent();
         }
     }
 }

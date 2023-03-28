@@ -93,12 +93,13 @@ namespace TeamAlumniNETBackend.Controller
         /// <param name="group"></param>
         /// <returns>New group</returns>
         [HttpPost("/group")]
-        public async Task<ActionResult<Group>> PostGroup(Group @group)
+        [ActionName(nameof(GetGroup))]
+        public async Task<ActionResult<Group>> PostGroup([FromBody] Group @group)
         {
             _context.Groups.Add(@group);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetGroup", new { id = @group.GroupId }, @group);
+            return CreatedAtAction(nameof(GetGroup), new { id = @group.GroupId }, @group);
         }
 
         /// <summary>

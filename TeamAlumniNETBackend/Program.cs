@@ -53,16 +53,16 @@ namespace TeamAlumniNETBackend
 
             builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
-            //builder.Services.AddCors(options =>
-            //{
-            //    options.AddDefaultPolicy(
-            //        builder =>
-            //        {
-            //            builder.WithOrigins("https://localhost:44377", "http://localhost:3000")
-            //                                .AllowAnyHeader()
-            //                                .AllowAnyMethod();
-            //        });
-            //});
+            builder.Services.AddCors(options =>
+            {
+                options.AddDefaultPolicy(
+                    builder =>
+                    {
+                        builder.AllowAnyOrigin()
+                                            .AllowAnyHeader()
+                                            .AllowAnyMethod();
+                    });
+            });
 
             // Add services to the container.
 
@@ -71,6 +71,7 @@ namespace TeamAlumniNETBackend
             );
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
+
             builder.Services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo
@@ -119,22 +120,18 @@ namespace TeamAlumniNETBackend
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
-                app.UseSwagger();
-                app.UseSwaggerUI();
+
             }
+
+            app.UseSwagger();
+            app.UseSwaggerUI();
 
             app.UseHttpsRedirection();
 
-            app.UseAuthentication();
             app.UseRouting();
-            app.UseCors(builder =>
-            {
-                builder
-                .AllowAnyHeader()
-                .AllowAnyMethod()
-                .AllowAnyOrigin();
+            app.UseCors();
+            app.UseAuthentication();
 
-            });
             app.UseAuthorization();
             app.UseEndpoints(endpoints =>
             {

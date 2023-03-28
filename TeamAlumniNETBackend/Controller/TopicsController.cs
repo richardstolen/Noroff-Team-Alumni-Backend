@@ -92,12 +92,13 @@ namespace TeamAlumniNETBackend.Controller
         /// <param name="topic"></param>
         /// <returns></returns>
         [HttpPost]
+        [ActionName(nameof(GetTopic))]
         public async Task<ActionResult<Topic>> PostTopic(Topic topic)
         {
             _context.Topics.Add(topic);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetTopic", new { id = topic.TopicId }, topic);
+            return CreatedAtAction(nameof(GetTopic), new { id = topic.TopicId }, topic);
         }
 
         /// <summary>
@@ -143,6 +144,35 @@ namespace TeamAlumniNETBackend.Controller
             topic.Users.Add(user);
 
             // Save
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
+
+        /// <summary>
+        /// Remove user from Topic.
+        /// </summary>
+        /// <param name="topic_id"></param>
+        /// <param name="user_id"></param>
+        /// <returns></returns>
+        [HttpPost("/topic/{topic_id}/remove")]
+        public async Task<IActionResult> RemoveUserFromTopic(int topic_id, [FromHeader] Guid user_id)
+        {
+            // Load the parent entity that contains the collection of child entities
+            var parentEntity = _context.Topics.Include(p => p.Users).FirstOrDefault(p => p.TopicId == topic_id);
+
+            if (parentEntity == null)
+            {
+                return NotFound();
+            }
+
+            // Get the child entity that you want to delete
+            var childEntity = parentEntity.Users.FirstOrDefault(c => c.UserId == user_id);
+
+            // Remove the child entity from the parent entity's collection of child entities
+            parentEntity.Users.Remove(childEntity);
+
+            // Save the changes to the database
             await _context.SaveChangesAsync();
 
             return NoContent();

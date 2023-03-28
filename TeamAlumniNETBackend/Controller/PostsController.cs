@@ -322,15 +322,65 @@ namespace TeamAlumniNETBackend.Controller
         /// <param name="targetTopic"></param>
         /// <returns>List of posts</returns>
         [HttpGet("topic/topic_id")]
-        public async Task<ActionResult<IEnumerable<Post>>> GetPostsByTopic([FromHeader] int targetTopic)
+        public async Task<ActionResult<IEnumerable<PostGetDTO>>> GetPostsByTopic([FromHeader] int targetTopic)
         {
-            var topicPost = await _context.Posts.Where(Post => Post.TargetTopic == targetTopic).ToListAsync();
 
-            if (topicPost == null)
+            var topic = await _context.Topics.FindAsync(targetTopic);
+
+            if (topic == null)
             {
                 return NotFound();
             }
-            return topicPost;
+
+            var topicPost = await _context.Posts.Where(Post => Post.TargetTopic == targetTopic).ToListAsync();
+
+            var postListTuple = new List<Tuple<Post, string>>();
+
+            foreach (var post in topicPost)
+            {
+                var postTuple = new Tuple<Post, string>(post, topic.Name == null ? "NO NAME" : topic.Name);
+                postListTuple.Add(postTuple);
+            }
+
+            var postDTOList = new List<PostGetDTO>();
+
+            for (int i = 0; i < postListTuple.Count; i++)
+            {
+                var postDTO = new PostGetDTO();
+                postDTO.PostId = postListTuple[i].Item1.PostId;
+                var createdBy = await _context.Users.FindAsync(postListTuple[i].Item1.UserId);
+                postDTO.CreatedBy = createdBy?.UserName;
+                postDTO.Image = createdBy?.Image;
+                postDTO.LastUpdate = postListTuple[i].Item1.LastUpdate;
+                postDTO.Body = postListTuple[i].Item1.Body;
+                postDTO.Title = postListTuple[i].Item1.Title;
+                postDTO.Target = postListTuple[i].Item2;
+                var comments = await _context.Posts.Where(p => p.TargetPost == postListTuple[i].Item1.PostId).ToListAsync();
+
+                foreach (var comment in comments)
+                {
+                    var commentDTO = new CommentDTO();
+                    commentDTO.PostId = comment.PostId;
+                    var _createdBy = await _context.Users.FindAsync(comment.UserId);
+                    commentDTO.CreatedBy = _createdBy.UserName;
+                    commentDTO.Image = _createdBy?.Image;
+                    commentDTO.Target = comment.TargetPost;
+                    commentDTO.LastUpdate = comment.LastUpdate;
+                    commentDTO.Body = comment.Body;
+                    commentDTO.Title = comment.Title;
+
+                    postDTO.Comments.Add(commentDTO);
+                }
+
+                postDTO.Comments = postDTO.Comments.OrderBy(x => x.LastUpdate).ToList();
+
+                postDTOList.Add(postDTO);
+            }
+
+            // Sorting the list, with last updated post first
+            postDTOList.Sort((x, y) => DateTime.Compare(y.LastUpdate, x.LastUpdate));
+
+            return postDTOList;
         }
 
         /// <summary>
@@ -339,15 +389,64 @@ namespace TeamAlumniNETBackend.Controller
         /// <param name="targetEvent"></param>
         /// <returns>List of posts</returns>
         [HttpGet("event/event_id")]
-        public async Task<ActionResult<IEnumerable<Post>>> GetPostsByEvent([FromHeader] int targetEvent)
+        public async Task<ActionResult<IEnumerable<PostGetDTO>>> GetPostsByEvent([FromHeader] int targetEvent)
         {
-            var eventPost = await _context.Posts.Where(Post => Post.TargetEvent == targetEvent).ToListAsync();
+            var @event = await _context.Events.FindAsync(targetEvent);
 
-            if (eventPost == null)
+            if (@event == null)
             {
                 return NotFound();
             }
-            return eventPost;
+
+            var topicPost = await _context.Posts.Where(Post => Post.TargetEvent == targetEvent).ToListAsync();
+
+            var postListTuple = new List<Tuple<Post, string>>();
+
+            foreach (var post in topicPost)
+            {
+                var postTuple = new Tuple<Post, string>(post, @event.Title == null ? "NO NAME" : @event.Title);
+                postListTuple.Add(postTuple);
+            }
+
+            var postDTOList = new List<PostGetDTO>();
+
+            for (int i = 0; i < postListTuple.Count; i++)
+            {
+                var postDTO = new PostGetDTO();
+                postDTO.PostId = postListTuple[i].Item1.PostId;
+                var createdBy = await _context.Users.FindAsync(postListTuple[i].Item1.UserId);
+                postDTO.CreatedBy = createdBy?.UserName;
+                postDTO.Image = createdBy?.Image;
+                postDTO.LastUpdate = postListTuple[i].Item1.LastUpdate;
+                postDTO.Body = postListTuple[i].Item1.Body;
+                postDTO.Title = postListTuple[i].Item1.Title;
+                postDTO.Target = postListTuple[i].Item2;
+                var comments = await _context.Posts.Where(p => p.TargetPost == postListTuple[i].Item1.PostId).ToListAsync();
+
+                foreach (var comment in comments)
+                {
+                    var commentDTO = new CommentDTO();
+                    commentDTO.PostId = comment.PostId;
+                    var _createdBy = await _context.Users.FindAsync(comment.UserId);
+                    commentDTO.CreatedBy = _createdBy.UserName;
+                    commentDTO.Image = _createdBy?.Image;
+                    commentDTO.Target = comment.TargetPost;
+                    commentDTO.LastUpdate = comment.LastUpdate;
+                    commentDTO.Body = comment.Body;
+                    commentDTO.Title = comment.Title;
+
+                    postDTO.Comments.Add(commentDTO);
+                }
+
+                postDTO.Comments = postDTO.Comments.OrderBy(x => x.LastUpdate).ToList();
+
+                postDTOList.Add(postDTO);
+            }
+
+            // Sorting the list, with last updated post first
+            postDTOList.Sort((x, y) => DateTime.Compare(y.LastUpdate, x.LastUpdate));
+
+            return postDTOList;
         }
 
         /// <summary>
@@ -410,7 +509,15 @@ namespace TeamAlumniNETBackend.Controller
                     existingEntity.GetType().GetProperty(prop.Name)?.SetValue(existingEntity, prop.GetValue(post));
                 }
             }
-            existingEntity.LastUpdate = GetDateNow();
+
+            // Get the time zone information for Norway
+            TimeZoneInfo norwayTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Central European Standard Time");
+
+            // Get the current time in Norway
+            DateTimeOffset norwayTime = DateTimeOffset.UtcNow.ToOffset(norwayTimeZone.GetUtcOffset(DateTime.UtcNow));
+
+            post.LastUpdate = norwayTime.UtcDateTime;
+            existingEntity.LastUpdate = norwayTime.UtcDateTime;
 
             // Save to DB
             await _context.SaveChangesAsync();
@@ -484,8 +591,15 @@ namespace TeamAlumniNETBackend.Controller
             //    return Forbid();
             //}
 
-            DateTime now = DateTime.Now;
-            post.LastUpdate = now;
+            // Get the time zone information for Norway
+            TimeZoneInfo norwayTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Central European Standard Time");
+
+            // Get the current time in Norway
+            DateTimeOffset norwayTime = DateTimeOffset.UtcNow.ToOffset(norwayTimeZone.GetUtcOffset(DateTime.UtcNow));
+
+            DateTime now = DateTime.UtcNow;
+            now.AddHours(2);
+            post.LastUpdate = norwayTime.UtcDateTime;
             _context.Posts.Add(post);
             await _context.SaveChangesAsync();
 
@@ -529,7 +643,7 @@ namespace TeamAlumniNETBackend.Controller
 
             if (isDaylight)
             {
-                thisTime.AddHours(1);
+                thisTime.AddHours(2);
             }
 
             return thisTime;
